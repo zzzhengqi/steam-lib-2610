@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#0d1216">
+<title>蒸汽会员专属资源库</title>
+<meta name="description" content="蒸汽会员专属资源库：AI Agent 新人的学习路线、课程、安装教程、源码、提示词与速查手册">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23ff9a4d'/%3E%3Cpath d='M11 24c-3 0-3-3 0-4s3-4 0-5M17 24c-3 0-3-3 0-4s3-4 0-5M23 24c-3 0-3-3 0-4s3-4 0-5' stroke='%230d1216' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="intro preload">
+
+<!-- 背景：蒸汽 + 大字拉伸 -->
+<div class="bg" aria-hidden="true">
+  <div class="steam"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="stretch" id="stretch"></div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="floater" id="floater">
+    <div class="device folded" id="device">
+
+      <!-- 左半机身：折叠时盖在右半边前面，外侧是外屏（锁屏），从右向左翻开 -->
+      <div class="half left">
+        <div class="front">
+          <div class="screen">
+            <div class="wall"><i></i><i></i><i></i><i></i></div>
+            <div class="content" id="homeL"></div>
+            <div class="shade"></div>
+          </div>
+        </div>
+        <div class="back cover">
+          <div class="cscreen">
+            <div class="wall"><i></i><i></i><i></i><i></i></div>
+            <span class="cam" aria-hidden="true"></span>
+            <div class="lock" id="lock" role="button" tabindex="0" aria-label="展开资源库"></div>
+            <div class="off"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右半机身（内屏右半） -->
+      <div class="half right">
+        <div class="front">
+          <div class="screen">
+            <div class="wall"><i></i><i></i><i></i><i></i></div>
+            <div class="content" id="homeR"></div>
+            <span class="cam" aria-hidden="true"></span>
+            <div class="lock lockm" id="lockM" role="button" tabindex="0" aria-label="进入资源库"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 应用窗口 -->
+      <section class="app" id="app" role="dialog" aria-modal="true" aria-labelledby="appTitle" hidden>
+        <div class="app-bg" id="appBg"></div>
+        <header class="app-head">
+          <button class="app-back" id="appBack" type="button" aria-label="返回主屏幕"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg><span>主屏幕</span></button>
+          <div class="app-title" id="appTitle"></div>
+          <button class="hbtn" id="appSearch" type="button" aria-label="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+        </header>
+        <div class="app-body" id="appBody"></div>
+        <button class="hbar" id="hbar" type="button" aria-label="回到主屏幕"></button>
+      </section>
+
+      <!-- 全局搜索 -->
+      <div class="spot" id="spot" hidden>
+        <div class="spot-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input id="spotQ" type="search" placeholder="搜索全部资料：安装、mp4、报错…" autocomplete="off" aria-label="搜索全部资料">
+          <button class="spot-x" id="spotX" type="button">取消</button>
+        </div>
+        <div class="spot-res" id="spotRes"></div>
+      </div>
+
+    </div>
+    <div class="ground" aria-hidden="true"></div>
+  </div>
+  <p class="hint" id="hint">轻点手机展开</p>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">已复制</div>
+<noscript><p style="color:#fff;text-align:center;padding:40px">请开启浏览器的 JavaScript 后访问资源库。</p></noscript>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
