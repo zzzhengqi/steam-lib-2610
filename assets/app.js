@@ -60,26 +60,39 @@
   function code(t) { return '<div class="codebox"><pre class="code">' + esc(t) + '</pre><button class="btn copy" type="button">复制</button></div>'; }
   function ul(a, tag) { tag = tag || "ul"; return a && a.length ? "<" + tag + ">" + a.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</" + tag + ">" : ""; }
 
+  /* 表格、分级、补充说明：任何卡片都可以带 table / levels / list / note 字段 */
+  function tbl(t) {
+    if (!t || !t.rows) return "";
+    var h = t.head ? "<thead><tr>" + t.head.map(function (x) { return "<th>" + esc(x) + "</th>"; }).join("") + "</tr></thead>" : "";
+    var b = "<tbody>" + t.rows.map(function (r) { return "<tr>" + r.map(function (x, j) { return "<td" + (j === 0 ? ' class="k"' : "") + (t.head ? ' data-l="' + esc(t.head[j]) + '"' : "") + ">" + esc(x) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody>";
+    return '<div class="tbl-wrap"><table class="tbl">' + h + b + "</table></div>";
+  }
+  function levels(a) {
+    return a && a.length ? '<div class="lv">' + a.map(function (l) { return '<div class="lv-i lv-' + esc(l.c) + '"><b>' + esc(l.t) + "</b><span>" + esc(l.d) + "</span></div>"; }).join("") + "</div>" : "";
+  }
+  function extra(it) { return levels(it.levels) + ul(it.list) + tbl(it.table) + (it.note ? '<p class="note">' + esc(it.note) + "</p>" : ""); }
+  function wide(it) { return it.wide ? " wide" : ""; }
+
   var R = {
-    cards: function (it) { return { tag: "div", cls: "card" + (it.slot ? " slot" : ""), html: "<h3>" + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" }; },
+    cards: function (it) { return { tag: "div", cls: "card" + (it.slot ? " slot" : "") + (it.hl ? " hl" : "") + wide(it), html: "<h3>" + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" + extra(it) }; },
     plan: function (it) { return { tag: "div", cls: "card", html: '<h3><span class="wk">' + esc(it.w) + "</span>" + esc(it.t) + "</h3>" + ul(it.list) }; },
     steps: function (it, i) {
       return { tag: "div", cls: "step", html: '<div class="num">' + (i + 1) + '</div><div class="body"><h3>' + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" + (it.code ? code(it.code) : "") + ul(it.list) + "</div>" };
     },
-    links: function (it) { return { tag: "div", cls: "card", html: '<div class="row"><h3>' + esc(it.name) + '</h3><span class="tag">' + esc(it.tag) + "</span></div><p>" + esc(it.desc) + '</p><div class="links">' + btn("打开官网", it.url, true) + "</div>" }; },
+    links: function (it) { return { tag: "div", cls: "card" + (it.hl ? " hl" : "") + wide(it), html: '<div class="row"><h3>' + esc(it.name) + '</h3><span class="tag">' + esc(it.tag) + "</span></div><p>" + esc(it.desc) + "</p>" + extra(it) + (it.links ? '<div class="links">' + it.links.map(function (l) { return btn(l.label, l.url, false); }).join("") + "</div>" : it.noBtn ? "" : '<div class="links">' + btn(it.btn || "打开官网", it.url, true) + "</div>") }; },
     projects: function (it) {
       var ls = (it.links || []).map(function (l) { return btn(l.label, l.url, false); }).join("");
       return { tag: "div", cls: "card" + (it.slot ? " slot" : ""), html: '<div class="row"><h3>' + esc(it.name) + "</h3>" + badge(it.status) + "</div>" + tags(it.tags) + "<p>" + esc(it.desc) + "</p>" + (ls ? '<div class="links">' + ls + "</div>" : "") };
     },
     videos: function (it) { return { tag: "div", cls: "card" + (it.slot ? " slot" : ""), html: '<div class="row"><h3>' + esc(it.title) + "</h3>" + badge(it.status) + "</div><p>" + esc(it.desc) + '</p><div class="links">' + btn("观看 / 获取", it.url, true) + "</div>" }; },
-    prompts: function (it) { return { tag: "div", cls: "card", html: '<div class="row"><h3>' + esc(it.title) + "</h3>" + (it.tag ? '<span class="tag">' + esc(it.tag) + "</span>" : "") + "</div><p>" + esc(it.desc) + "</p>" + code(it.text) }; },
+    prompts: function (it) { return { tag: "div", cls: "card" + wide(it), html: '<div class="row"><h3>' + esc(it.title) + "</h3>" + (it.tag ? '<span class="tag">' + esc(it.tag) + "</span>" : "") + "</div><p>" + esc(it.desc) + "</p>" + code(it.text) }; },
     lessons: function (it, i, sec) {
       var no = (sec.noLabel || "第{n}课").replace("{n}", i + 1);
       var b = '<div class="goal">目标：' + esc(it.goal) + "</div><h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4><p>" + esc(it.practice) + "</p><h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
       return { tag: "details", cls: "", html: '<summary><span class="no">' + esc(no) + '</span><span class="tt">' + esc(it.title) + '</span></summary><div class="ans">' + b + "</div>" };
     },
     faq: function (it) { return { tag: "details", cls: "", html: '<summary><span class="tt">' + esc(it.q) + '</span></summary><div class="ans">' + it.a + "</div>" }; },
-    safety: function (it, i) { return { tag: "div", cls: "card", html: "<h3>" + (i + 1) + ". " + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" }; },
+    safety: function (it, i) { return { tag: "div", cls: "card" + (it.hl ? " hl" : "") + wide(it), html: "<h3>" + (i + 1) + ". " + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" + extra(it) }; },
     skills: function (it) {
       return { tag: "div", cls: "card", html: '<div class="row"><h3>' + esc(it.title) + '</h3><span class="tag">' + esc(it.tag) + "</span></div><p>" + esc(it.desc) + "</p>" + (it.code ? code(it.code) : "") + ul(it.list) + (it.url ? '<div class="links">' + btn("GitHub 主页", it.url, true) + "</div>" : "") };
     },
@@ -89,11 +102,21 @@
 
   function renderSection(sec) {
     var out = (WRAP[sec.type] || '<div class="grid">');
-    sec.items.forEach(function (it, i) {
+    var chips = "";
+    var idx = sec.items.map(function (_, i) { return i; });
+    if (sec.filter) {
+      var seen = {}, fl = Array.isArray(sec.filter) ? sec.filter.slice() : [];
+      fl.forEach(function (t) { seen[t] = 1; });
+      sec.items.forEach(function (it) { if (it.tag && !seen[it.tag]) { seen[it.tag] = 1; fl.push(it.tag); } });
+      idx.sort(function (a, b) { return (fl.indexOf(sec.items[a].tag) - fl.indexOf(sec.items[b].tag)) || (a - b); });
+      chips = '<div class="chips" role="group" aria-label="按类别筛选"><button class="chip on" type="button" data-f="">全部</button>' + fl.map(function (t) { return '<button class="chip" type="button" data-f="' + esc(t) + '">' + esc(t) + "</button>"; }).join("") + "</div>";
+    }
+    idx.forEach(function (i, n) {
+      var it = sec.items[i];
       var r = (R[sec.type] || R.cards)(it, i, sec);
-      out += "<" + r.tag + ' class="' + r.cls + ' item" data-k="' + sec.id + "-" + i + '" style="--d:' + (Math.min(i, 10) * 0.045 + 0.12).toFixed(3) + 's">' + r.html + "</" + r.tag + ">";
+      out += "<" + r.tag + ' class="' + r.cls + ' item"' + (it.tag ? ' data-tag="' + esc(it.tag) + '"' : "") + ' data-k="' + sec.id + "-" + i + '" style="--d:' + (Math.min(n, 10) * 0.045 + 0.12).toFixed(3) + 's">' + r.html + "</" + r.tag + ">";
     });
-    return '<div class="wrap"><h2>' + esc(sec.title) + '</h2><p class="intro">' + esc(sec.intro) + "</p>" + out + '</div><p class="app-foot">蒸汽会员专属资源库 · 仅供会员本人学习使用，请勿转发或转卖 · 最近更新 ' + esc(S.updated || "") + "</p></div>";
+    return '<div class="wrap"><h2>' + esc(sec.title) + '</h2><p class="intro">' + esc(sec.intro) + "</p>" + chips + out + '</div><p class="app-foot">蒸汽会员专属资源库 · 仅供会员本人学习使用，请勿转发或转卖 · 最近更新 ' + esc(S.updated || "") + "</p></div>";
   }
 
   /* ---------------- 搜索索引 ---------------- */
@@ -102,7 +125,9 @@
     sec.items.forEach(function (it, i) {
       var title = it.title || it.t || it.name || it.q || it.term || it.w || "";
       var sub = it.desc || it.d || it.goal || it.def || plain(it.a) || (it.list || []).join("，");
-      var all = [title, sub, it.text, it.code, plain(it.a), (it.steps || []).join(" "), it.practice, (it.list || []).join(" "), (it.tags || []).join(" "), it.tag].join(" ").toLowerCase();
+      var tb = it.table ? (it.table.head || []).concat.apply([], it.table.rows).join(" ") : "";
+      var lv = (it.levels || []).map(function (l) { return l.t + " " + l.d; }).join(" ");
+      var all = [title, sub, tb, lv, it.note, it.text, it.code, plain(it.a), (it.steps || []).join(" "), it.practice, (it.list || []).join(" "), (it.tags || []).join(" "), it.tag].join(" ").toLowerCase();
       INDEX.push({ sec: sec, i: i, title: title, sub: sub, all: all });
     });
   });
@@ -430,7 +455,13 @@
       return;
     }
     var c = e.target.closest(".btn.copy");
-    if (c) { var pre = c.parentNode.querySelector("pre"); if (pre) copy(pre.textContent); }
+    if (c) { var pre = c.parentNode.querySelector("pre"); if (pre) copy(pre.textContent); return; }
+    var ch = e.target.closest(".chip[data-f]");
+    if (ch) {
+      var box = ch.closest(".wrap"), f = ch.getAttribute("data-f");
+      box.querySelectorAll(".chip").forEach(function (x) { x.classList.toggle("on", x === ch); });
+      box.querySelectorAll(".item").forEach(function (x) { x.classList.toggle("off", !!f && x.getAttribute("data-tag") !== f); });
+    }
   });
 
   document.addEventListener("keydown", function (e) {
