@@ -338,6 +338,7 @@ body.editing .wg:not(.placeholder){animation:jiggleW .32s ease-in-out infinite a
 .b-wip{background:rgba(255,159,10,.16);color:var(--warn)}
 .b-plan{background:rgba(0,0,0,.05);color:var(--plan)}
 .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.row .tag,.row .badge{flex:none;white-space:nowrap}
 .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
 .btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;padding:6px 15px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:#fff;color:var(--ink);font-size:13px;cursor:pointer;font-family:inherit;transition:.2s;text-decoration:none;white-space:nowrap}
 .btn:hover{border-color:var(--accent2);color:var(--accent2)}
