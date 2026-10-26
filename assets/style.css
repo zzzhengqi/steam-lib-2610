@@ -500,3 +500,10 @@ details .ans .codebox{margin-top:10px}
 .m .rd-head{padding:11px 12px;gap:6px}
 .m .rd-body{padding:18px 18px 40px}
 @media(prefers-reduced-motion:reduce){.rd-panel,.rd-mask{transition:none}}
+
+/* 底栏图标拖进网格后不再保留底栏放大效果 */
+.igrid .sq{--ds:1!important}
+/* 卡片按钮统一贴底对齐 */
+.card .more{margin-top:auto}
+.card .more ~ .links{margin-top:0}
+.sr-tools{display:flex;flex-wrap:wrap;gap:8px}

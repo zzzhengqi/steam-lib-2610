@@ -85,7 +85,7 @@
       return { tag: "div", cls: "card" + (it.slot ? " slot" : ""), html: '<div class="row"><h3>' + esc(it.name) + "</h3>" + badge(it.status) + "</div>" + tags(it.tags) + "<p>" + esc(it.desc) + "</p>" + (ls ? '<div class="links">' + ls + "</div>" : "") };
     },
     videos: function (it) { return { tag: "div", cls: "card" + (it.slot ? " slot" : ""), html: '<div class="row"><h3>' + esc(it.title) + "</h3>" + badge(it.status) + "</div><p>" + esc(it.desc) + '</p><div class="links">' + btn("观看 / 获取", it.url, true) + "</div>" }; },
-    prompts: function (it) { return { tag: "div", cls: "card" + wide(it), html: '<div class="row"><h3>' + esc(it.title) + "</h3>" + (it.tag ? '<span class="tag">' + esc(it.tag) + "</span>" : "") + "</div><p>" + esc(it.desc) + "</p>" + code(it.text) }; },
+    prompts: function (it) { return { tag: "div", cls: "card" + wide(it), html: '<div class="row"><h3>' + esc(it.title) + "</h3>" + (it.meta || it.tag ? '<span class="tag">' + esc(it.meta || it.tag) + "</span>" : "") + "</div><p>" + esc(it.desc) + "</p>" + code(it.text) }; },
     lessons: function (it, i, sec) {
       var no = (sec.noLabel || "第{n}课").replace("{n}", i + 1);
       var b = '<div class="goal">目标：' + esc(it.goal) + "</div><h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4><p>" + esc(it.practice) + "</p><h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
@@ -191,6 +191,10 @@
   function saveOrder(o) { ORDER = o; try { localStorage.setItem(ORDER_KEY, JSON.stringify(o)); } catch (e) {} }
   function clearOrder() { ORDER = {}; try { localStorage.removeItem(ORDER_KEY); } catch (e) {} }
   function hasCustom() { return !!(ORDER.g || ORDER.d || ORDER.w); }
+  /* 锁定排列：锁定后不能拖动，直到本人解除锁定或恢复默认 */
+  var LOCK_KEY = "steam-home-lock-v1";
+  var LOCKED = (function () { try { return localStorage.getItem(LOCK_KEY) === "1"; } catch (e) { return false; } })();
+  function setLock(on) { LOCKED = !!on; try { if (on) localStorage.setItem(LOCK_KEY, "1"); else localStorage.removeItem(LOCK_KEY); } catch (e) {} }
   function ordered(def, saved) {
     if (!saved || !saved.length) return def.slice();
     var out = saved.filter(function (k) { return def.indexOf(k) > -1; });
@@ -513,7 +517,7 @@
       list = INDEX.filter(function (x) { return x.all.indexOf(q) > -1 || x.sec.title.toLowerCase().indexOf(q) > -1; }).slice(0, 40);
     }
     if (!list.length) { spotRes.innerHTML = '<div class="spot-empty">没有找到相关内容，换个关键词试试</div>'; return; }
-    spotRes.innerHTML = (!q && hasCustom() ? '<button class="sr-reset" type="button" data-reset="1">恢复默认图标排列</button>' : "") + list.map(function (x, n) {
+    spotRes.innerHTML = (!q ? '<div class="sr-tools"><button class="sr-reset" type="button" data-lock="1">' + (LOCKED ? "解除图标锁定" : "锁定图标排列") + "</button>" + (hasCustom() ? '<button class="sr-reset" type="button" data-reset="1">恢复默认图标排列</button>' : "") + "</div>" : "") + list.map(function (x, n) {
       return '<button class="sr" type="button" data-open="' + x.sec.id + '"' + (x.i != null ? ' data-item="' + x.i + '"' : "") + ' style="animation-delay:' + Math.min(n, 12) * 18 + 'ms"><span class="mini" style="' + gvars(x.sec) + '">' + glyph(x.sec) +
         "</span><div><b>" + esc(x.title) + "</b><small>" + esc(x.i != null ? x.sec.title + " · " + x.sub : x.sub) + "</small></div></button>";
     }).join("");
@@ -568,7 +572,9 @@
 
   /* ---------------- 提示条 + 恢复默认 ---------------- */
   function setHint() {
-    hint.innerHTML = "点击图标进入 · 拖动图标可调整位置 · 左屏空白处向右拖动可合上手机 · 按 / 搜索" + (hasCustom() ? ' · <button type="button" data-reset="1">恢复默认排列</button>' : "");
+    hint.innerHTML = (LOCKED ? "点击图标进入 · 图标排列已锁定 · " : "点击图标进入 · 拖动图标可调整位置 · ") + "左屏空白处向右拖动可合上手机 · 按 / 搜索" +
+      ' · <button type="button" data-lock="1">' + (LOCKED ? "解除锁定" : "锁定排列") + "</button>" +
+      (hasCustom() ? ' · <button type="button" data-reset="1">恢复默认排列</button>' : "");
   }
   function resetOrder() {
     clearOrder(); buildHome(); setHint();
@@ -577,6 +583,12 @@
   }
   document.addEventListener("click", function (e) {
     if (e.target.closest("[data-reset]")) { e.preventDefault(); e.stopPropagation(); resetOrder(); }
+    else if (e.target.closest("[data-lock]")) {
+      e.preventDefault(); e.stopPropagation();
+      setLock(!LOCKED); setHint();
+      if (!spot.hidden) renderResults(spotQ.value);
+      toast(LOCKED ? "已锁定图标排列，不会被误拖动" : "已解除锁定，可以拖动调整");
+    }
   }, true);
 
   /* 入场动画结束后解除，让悬停/拖动的位移生效 */
@@ -643,6 +655,7 @@
     });
   }
   function startDrag() {
+    if (LOCKED) { drag = null; toast("图标排列已锁定，可在底部提示或搜索里解除锁定"); return false; }
     var el = drag.el, r = el.getBoundingClientRect();
     drag.started = true;
     device.style.transform = "";
@@ -700,6 +713,7 @@
     var d = drag; drag = null;
     if (!d.started) return;
     suppressClick = true; setTimeout(function () { suppressClick = false; }, 60);
+    device.querySelectorAll(".sq").forEach(function (q) { ["--ds", "--rx", "--ry"].forEach(function (k) { q.style.removeProperty(k); }); });
     var r = d.el.getBoundingClientRect(), g = d.ghost;
     g.classList.remove("lift"); g.classList.add("drop");
     g.style.left = r.left + "px"; g.style.top = r.top + "px";
@@ -708,7 +722,7 @@
       if (!document.querySelector(".ghost")) body.classList.remove("editing");
     }, 320);
     persist(); setHint();
-    if (!cancel) toast("已保存新的排列");
+    if (!cancel) toast("已保存新的排列，下次打开也会保持");
   }
   device.addEventListener("pointerdown", function (e) {
     if (!body.classList.contains("ready") || !app.hidden || !spot.hidden || drag) return;
@@ -724,7 +738,7 @@
     if (!drag.started) {
       if (drag.touch) { if (Math.hypot(dx, dy) > 9) { clearTimeout(drag.timer); drag = null; } return; }
       if (Math.hypot(dx, dy) < 6) return;
-      startDrag();
+      if (startDrag() === false) return;
     }
     drag.ghost.style.left = (e.clientX - drag.ox) + "px";
     drag.ghost.style.top = (e.clientY - drag.oy) + "px";
