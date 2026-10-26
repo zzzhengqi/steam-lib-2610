@@ -356,13 +356,15 @@
     appBody.scrollTop = 0;
     app.classList.remove("show");
     app.hidden = false;
+    appBody.scrollTop = 0;
+    clampCards();
     body.classList.add("app-open");
     var icon = originIcon(id);
     if (opt.push !== false) history.pushState({ app: id }, "", "#/" + id);
     var done = function () {
       opening = false;
       app.classList.add("show");
-      if (opt.item != null) focusItem(id, opt.item); else $("appBack").focus({ preventScroll: true });
+      if (opt.item != null) focusItem(id, opt.item); else { appBody.scrollTop = 0; $("appBack").focus({ preventScroll: true }); }
     };
     if (reduce || !icon) { done(); return; }
     icon.classList.add("opening");
@@ -378,7 +380,8 @@
     if (app.hidden || opening) return;
     var id = current, icon = originIcon(id);
     var finish = function () {
-      app.hidden = true; app.classList.remove("show"); appBody.innerHTML = ""; current = null; opening = false; body.classList.remove("app-open");
+      closeReader(true);
+      app.hidden = true; app.classList.remove("show"); appBody.innerHTML = ""; appBody.scrollTop = 0; current = null; opening = false; body.classList.remove("app-open");
       if (icon) { icon.classList.remove("opening"); icon.focus({ preventScroll: true }); }
     };
     if (opt.pop !== true && history.state && history.state.app) { history.back(); return; }
@@ -402,7 +405,88 @@
     if (el.tagName === "DETAILS") el.open = true;
     el.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
     el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+    if (el.classList.contains("clamp")) setTimeout(function () { openReader(el); }, reduce ? 0 : 380);
   }
+
+  /* ---------------- 长卡片：只显示固定高度，点开后在悬浮窗里看全文 ---------------- */
+  function clampCards() {
+    var lim = mobile ? 340 : 300;
+    appBody.querySelectorAll(".card.item").forEach(function (c) {
+      var links = null, kids = Array.prototype.slice.call(c.children);
+      var wrap = document.createElement("div"); wrap.className = "cbody";
+      kids.forEach(function (k) { if (k.classList.contains("links")) links = k; else wrap.appendChild(k); });
+      c.insertBefore(wrap, links);
+      var max = c.classList.contains("wide") ? lim + 160 : lim;
+      if (wrap.scrollHeight > max + 80) {
+        c.classList.add("clamp"); c.style.setProperty("--ch", max + "px");
+        var b = document.createElement("button"); b.type = "button"; b.className = "more"; b.textContent = "查看全部";
+        c.insertBefore(b, links);
+      }
+    });
+  }
+  var reader = document.createElement("div");
+  reader.className = "reader"; reader.hidden = true;
+  reader.innerHTML = '<div class="rd-mask"></div><div class="rd-panel" role="dialog" aria-modal="true" aria-label="查看全文">' +
+    '<nav class="rd-nav" aria-label="本板块目录"><div class="rd-nav-h">本板块目录</div><ol></ol></nav>' +
+    '<div class="rd-main"><div class="rd-head"><button class="rd-ib rd-toc" type="button">目录</button><span class="rd-pos"></span>' +
+    '<button class="rd-ib rd-prev" type="button" aria-label="上一条">↑<span> 上一条</span></button><button class="rd-ib rd-next" type="button" aria-label="下一条">↓<span> 下一条</span></button>' +
+    '<button class="rd-ib rd-x" type="button" aria-label="关闭">关闭</button></div><div class="rd-body"></div></div></div>';
+  app.appendChild(reader);
+  var rdNav = reader.querySelector(".rd-nav"), rdList = reader.querySelector("ol"), rdBody = reader.querySelector(".rd-body"), rdPos = reader.querySelector(".rd-pos");
+  var rdPrev = reader.querySelector(".rd-prev"), rdNext = reader.querySelector(".rd-next");
+  var rdKeys = [], rdAt = -1, rdBack = null, rdTimer = 0;
+  function keyIdx(k) { return +k.slice(k.lastIndexOf("-") + 1); }
+  function openReader(el) {
+    var sec = SEC[current]; if (!sec || !el) return;
+    var els = Array.prototype.filter.call(appBody.querySelectorAll(".card.item"), function (x) { return !x.classList.contains("off"); });
+    rdKeys = els.map(function (x) { return x.getAttribute("data-k"); });
+    rdList.innerHTML = rdKeys.map(function (k, n) {
+      var it = sec.items[keyIdx(k)], t = it.title || it.t || it.name || it.term || it.w || "", sub = it.meta || it.tag || "";
+      return '<li><button type="button" data-n="' + n + '">' + esc(t) + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</button></li>";
+    }).join("");
+    clearTimeout(rdTimer);
+    rdBack = document.activeElement;
+    reader.hidden = false; reader.classList.remove("toc");
+    requestAnimationFrame(function () { requestAnimationFrame(function () { reader.classList.add("show"); }); });
+    rdShow(Math.max(0, rdKeys.indexOf(el.getAttribute("data-k"))));
+    reader.querySelector(".rd-x").focus({ preventScroll: true });
+  }
+  function rdShow(n) {
+    if (n < 0 || n >= rdKeys.length) return;
+    rdAt = n;
+    var sec = SEC[current], i = keyIdx(rdKeys[n]), it = sec.items[i];
+    var r = (R[sec.type] || R.cards)(it, i, sec);
+    rdBody.innerHTML = '<div class="card rd-card' + (it.slot ? " slot" : "") + '">' + r.html + "</div>";
+    rdBody.scrollTop = 0;
+    rdPos.textContent = (n + 1) + " / " + rdKeys.length;
+    rdPrev.disabled = n === 0; rdNext.disabled = n === rdKeys.length - 1;
+    reader.classList.remove("toc");
+    Array.prototype.forEach.call(rdList.querySelectorAll("button"), function (b, m) {
+      b.classList.toggle("on", m === n);
+      if (m === n && (b.offsetTop < rdNav.scrollTop || b.offsetTop + b.offsetHeight > rdNav.scrollTop + rdNav.clientHeight)) rdNav.scrollTop = b.offsetTop - rdNav.clientHeight / 3;
+    });
+  }
+  function closeReader(instant) {
+    if (reader.hidden) return;
+    reader.classList.remove("show", "toc");
+    var done = function () { reader.hidden = true; rdBody.innerHTML = ""; };
+    if (instant === true || reduce) done(); else rdTimer = setTimeout(done, 320);
+    if (instant !== true && rdBack && rdBack.focus) rdBack.focus({ preventScroll: true });
+  }
+  reader.addEventListener("click", function (e) {
+    if (e.target.classList.contains("rd-mask") || e.target.closest(".rd-x")) { closeReader(); return; }
+    if (e.target.closest(".rd-prev")) { rdShow(rdAt - 1); return; }
+    if (e.target.closest(".rd-next")) { rdShow(rdAt + 1); return; }
+    if (e.target.closest(".rd-toc")) { reader.classList.toggle("toc"); return; }
+    var nb = e.target.closest("[data-n]"); if (nb) rdShow(+nb.getAttribute("data-n"));
+  });
+  /* 手机上左右滑动切换上一条 / 下一条 */
+  var rdTouch = null;
+  rdBody.addEventListener("touchstart", function (e) { var t = e.touches[0]; rdTouch = { x: t.clientX, y: t.clientY }; }, { passive: true });
+  rdBody.addEventListener("touchend", function (e) {
+    if (!rdTouch) return; var t = e.changedTouches[0], dx = t.clientX - rdTouch.x, dy = t.clientY - rdTouch.y; rdTouch = null;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.6) rdShow(rdAt + (dx < 0 ? 1 : -1));
+  }, { passive: true });
 
   $("appBack").addEventListener("click", function () { closeApp(); });
   $("hbar").addEventListener("click", function () { closeApp(); });
@@ -456,6 +540,10 @@
     }
     var c = e.target.closest(".btn.copy");
     if (c) { var pre = c.parentNode.querySelector("pre"); if (pre) copy(pre.textContent); return; }
+    var mo = e.target.closest(".more");
+    if (mo && appBody.contains(mo)) { openReader(mo.closest(".item")); return; }
+    var cb = e.target.closest(".clamp > .cbody");
+    if (cb && appBody.contains(cb) && !e.target.closest("a,button,input,summary,pre")) { openReader(cb.closest(".item")); return; }
     var ch = e.target.closest(".chip[data-f]");
     if (ch) {
       var box = ch.closest(".wrap"), f = ch.getAttribute("data-f");
@@ -466,6 +554,12 @@
 
   document.addEventListener("keydown", function (e) {
     var typing = /INPUT|TEXTAREA/.test(document.activeElement && document.activeElement.tagName);
+    if (!reader.hidden) {
+      if (e.key === "Escape") { e.preventDefault(); closeReader(); }
+      else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); rdShow(rdAt - 1); }
+      else if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); rdShow(rdAt + 1); }
+      return;
+    }
     if (e.key === "/" && !typing) { e.preventDefault(); openSpot(); }
     else if (e.key === "Escape") {
       if (!spot.hidden) closeSpot(); else if (!app.hidden) closeApp();
