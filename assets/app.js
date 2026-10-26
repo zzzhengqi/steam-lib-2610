@@ -17,7 +17,7 @@
     install:   { s: "Win 安装", g: ["#48484a", "#1c1c1e"], p: '<rect x="2" y="4" width="20" height="16" rx="2.5"/><path d="M6 9l3 3-3 3"/><path d="M12 15h6"/>' },
     mac:       { s: "Mac 安装", g: ["#ffffff", "#f1f1f4", "#1d1d1f"], p: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M1 20h22"/>' },
     cases:     { s: "场景案例", g: ["#ffffff", "#f1f1f4", "#af52de"], p: '<path d="M12 2l10 5-10 5L2 7l10-5z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/>' },
-    skills:    { s: "热门技能", g: ["#4b4f8c", "#25275a"], p: '<path d="M19.44 7.85c-.05.32.06.65.29.88l1.57 1.57c.47.47.7 1.09.7 1.7s-.23 1.24-.7 1.71l-1.61 1.61a.98.98 0 0 1-.84.28c-.47-.07-.8-.48-.97-.93a2.5 2.5 0 1 0-3.21 3.21c.45.17.86.5.93.97a.98.98 0 0 1-.28.84l-1.61 1.61a2.4 2.4 0 0 1-3.41 0l-1.57-1.57a1.03 1.03 0 0 0-.88-.29c-.49.07-.84.5-1.02.97a2.5 2.5 0 1 1-3.24-3.24c.46-.18.9-.53.97-1.02a1.03 1.03 0 0 0-.29-.88L2.7 13.7a2.4 2.4 0 0 1 0-3.41L4.23 8.77c.24-.24.58-.35.92-.3.51.08.88.53 1.07 1.01a2.5 2.5 0 1 0 3.26-3.26c-.48-.2-.93-.56-1.01-1.07-.05-.34.06-.68.3-.92L10.3 2.7a2.4 2.4 0 0 1 3.41 0l1.57 1.57c.23.23.56.34.88.29.49-.07.84-.5 1.02-.97a2.5 2.5 0 1 1 3.24 3.24c-.46.18-.9.53-.97 1.02z"/>' },
+    skills:    { s: "精选Skill", g: ["#4b4f8c", "#25275a"], p: '<path d="M19.44 7.85c-.05.32.06.65.29.88l1.57 1.57c.47.47.7 1.09.7 1.7s-.23 1.24-.7 1.71l-1.61 1.61a.98.98 0 0 1-.84.28c-.47-.07-.8-.48-.97-.93a2.5 2.5 0 1 0-3.21 3.21c.45.17.86.5.93.97a.98.98 0 0 1-.28.84l-1.61 1.61a2.4 2.4 0 0 1-3.41 0l-1.57-1.57a1.03 1.03 0 0 0-.88-.29c-.49.07-.84.5-1.02.97a2.5 2.5 0 1 1-3.24-3.24c.46-.18.9-.53.97-1.02a1.03 1.03 0 0 0-.29-.88L2.7 13.7a2.4 2.4 0 0 1 0-3.41L4.23 8.77c.24-.24.58-.35.92-.3.51.08.88.53 1.07 1.01a2.5 2.5 0 1 0 3.26-3.26c-.48-.2-.93-.56-1.01-1.07-.05-.34.06-.68.3-.92L10.3 2.7a2.4 2.4 0 0 1 3.41 0l1.57 1.57c.23.23.56.34.88.29.49-.07.84-.5 1.02-.97a2.5 2.5 0 1 1 3.24 3.24c-.46.18-.9.53-.97 1.02z"/>' },
     learn:     { s: "学习资源", g: ["#d1a679", "#a8794c"], p: '<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20z"/>' },
     practice:  { s: "实操篇",   g: ["#a7a7ad", "#7c7c82"], p: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>' },
     cognition: { s: "认知篇",   g: ["#ffffff", "#f1f1f4", "#ff9f0a"], p: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/>' },
@@ -81,7 +81,7 @@
     },
     links: function (it) { return { tag: "div", cls: "card" + (it.hl ? " hl" : "") + wide(it), html: '<div class="row"><h3>' + esc(it.name) + '</h3><span class="tag">' + esc(it.tag) + "</span></div><p>" + esc(it.desc) + "</p>" + extra(it) + (it.links ? '<div class="links">' + it.links.map(function (l) { return btn(l.label, l.url, false); }).join("") + "</div>" : it.noBtn ? "" : '<div class="links">' + btn(it.btn || "打开官网", it.url, true) + "</div>") }; },
     projects: function (it) {
-      var ls = (it.links || []).map(function (l) { return btn(l.label, l.url, false); }).join("");
+      var ls = (it.links || []).map(function (l) { return btn(l.label, l.url, !!l.pri); }).join("");
       return { tag: "div", cls: "card" + (it.slot ? " slot" : ""), html: '<div class="row"><h3>' + esc(it.name) + "</h3>" + badge(it.status) + "</div>" + tags(it.tags) + "<p>" + esc(it.desc) + "</p>" + (ls ? '<div class="links">' + ls + "</div>" : "") };
     },
     videos: function (it) { return { tag: "div", cls: "card" + (it.slot ? " slot" : ""), html: '<div class="row"><h3>' + esc(it.title) + "</h3>" + badge(it.status) + "</div><p>" + esc(it.desc) + '</p><div class="links">' + btn("观看 / 获取", it.url, true) + "</div>" }; },
@@ -94,7 +94,7 @@
     faq: function (it) { return { tag: "details", cls: "", html: '<summary><span class="tt">' + esc(it.q) + '</span></summary><div class="ans">' + it.a + "</div>" }; },
     safety: function (it, i) { return { tag: "div", cls: "card" + (it.hl ? " hl" : "") + wide(it), html: "<h3>" + (i + 1) + ". " + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" + extra(it) }; },
     skills: function (it) {
-      return { tag: "div", cls: "card", html: '<div class="row"><h3>' + esc(it.title) + '</h3><span class="tag">' + esc(it.tag) + "</span></div><p>" + esc(it.desc) + "</p>" + (it.code ? code(it.code) : "") + ul(it.list) + (it.url ? '<div class="links">' + btn("GitHub 主页", it.url, true) + "</div>" : "") };
+      return { tag: "div", cls: "card", html: '<div class="row"><h3>' + esc(it.title) + '</h3><span class="tag">' + esc(it.meta || it.tag) + "</span></div><p>" + esc(it.desc) + "</p>" + (it.code ? code(it.code) : "") + ul(it.list) + (it.url ? '<div class="links">' + btn("GitHub 主页", it.url, true) + "</div>" : "") };
     },
     glossary: function (it) { return { tag: "div", cls: "card", html: "<h3>" + esc(it.term) + "</h3><p>" + esc(it.def) + "</p>" }; }
   };
@@ -127,7 +127,7 @@
       var sub = it.desc || it.d || it.goal || it.def || plain(it.a) || (it.list || []).join("，");
       var tb = it.table ? (it.table.head || []).concat.apply([], it.table.rows).join(" ") : "";
       var lv = (it.levels || []).map(function (l) { return l.t + " " + l.d; }).join(" ");
-      var all = [title, sub, tb, lv, it.note, it.text, it.code, plain(it.a), (it.steps || []).join(" "), it.practice, (it.list || []).join(" "), (it.tags || []).join(" "), it.tag].join(" ").toLowerCase();
+      var all = [title, sub, tb, lv, it.note, it.text, it.code, plain(it.a), (it.steps || []).join(" "), it.practice, (it.list || []).join(" "), (it.tags || []).join(" "), it.tag, it.meta].join(" ").toLowerCase();
       INDEX.push({ sec: sec, i: i, title: title, sub: sub, all: all });
     });
   });
