@@ -8,7 +8,7 @@
    ===================================================================== */
 window.SITE = {
   title: "蒸汽会员专属资源库",
-  updated: "2026-10-26",
+  updated: "2026-10-31",
   sections: [
 
   /* ================= 开始 ================= */
@@ -281,18 +281,18 @@ window.SITE = {
   { id: "projects", group: "资料", icon: "🧪", title: "项目源码与案例", type: "projects",
     intro: "跟着真实项目学最快。带“点击即玩”的作品直接在浏览器里打开就能体验，源码可以下载下来让 Agent 帮你读懂和修改。部分 3D 作品需要较新的浏览器和性能较好的显卡。",
     items: [
-      { name: "热带海岛 3D 漫游：开船、潜水、看鲸鱼", status: "done", tags: ["3D 网页", "浏览器直接玩", "WebGPU"],
-        desc: "打开网页就能在一座热带海岛上自由走动：沿着沙滩散步、潜到珊瑚礁看鱼、开船出海、看座头鲸跃出水面，还有日出日落、夜晚灯光和真实的海浪声。适合学习：一个大型 3D 网页作品由哪些部分组成（海浪、天空、植被、光影、音效）。操作：WASD 移动，鼠标看方向，点击画面锁定鼠标、Esc 释放，E 上下船。需要较新的 Chrome、Edge 或 Safari 和性能较好的显卡；第一次打开要准备几百个画面效果，可能要等一分钟以上。基于 MIT 协议的开源项目改编，原作者信息见源码页。",
-        links: [{"label": "点击即玩", "url": "https://zzzhengqi.github.io/tidewater/", "pri": true}, {"label": "源码", "url": "https://github.com/zzzhengqi/tidewater"}] },
+      { name: "热带海岛 3D 漫游：冲浪、潜水、开船、钓鱼", status: "done", tags: ["3D 网页", "浏览器直接玩", "新版"],
+        desc: "新版海岛：一座属于你自己的热带小岛。时间、太阳方向和海浪大小都能自己调；可以下海游泳、潜到珊瑚礁、开船出海、用自由视角飞行，还能冲浪，在冲浪板库里挑板，配上自己喜欢的颜色或图片。钓鱼是可选玩法：在码头、沙滩或自己的船上钓，收获可以卖给鱼摊，换装备。界面支持简体中文、English、日本語、한국어 和阿拉伯语。适合学习：一个大型 3D 网页作品是怎么一步步加新玩法的。操作：WASD 移动，鼠标看方向，R 打开装备轮盘，H 打开设置，F1 查看全部按键。需要较新的 Chrome 或 Edge（Safari 26 及以上）和性能较好的显卡，第一次打开可能要等一分钟以上。基于 MIT 协议的开源项目改编，原作者信息见源码页。",
+        links: [{"label": "点击即玩", "url": "https://zzzhengqi.github.io/tidewater/v2/", "pri": true}, {"label": "源码", "url": "https://github.com/zzzhengqi/tidewater/tree/main-v2"}] },
       { name: "雪山单板滑雪：自由滑行和空中特技", status: "done", tags: ["浏览器游戏", "中文版", "附完整提示词"],
         desc: "在浏览器里直接玩的滑雪 / 单板游戏：从雪山上自由滑下，跳台起飞做空中特技，参加赛事拿分。已经做成中文界面，可以切换暴雪和晚霞天气，还能装上火箭单板加速。按任意键开始，M 打开地图，Esc 暂停并查看操作说明。这个游戏由 Claude Opus 5.5 在 Claude Code 里独立完成，源码里附有当时发给它的完整需求，适合学习怎么写一份能让 Agent 独立做完的需求。基于开源项目改编，原作者信息见源码页。",
         links: [{"label": "点击即玩", "url": "https://zzzhengqi.github.io/20261003-4/", "pri": true}, {"label": "源码", "url": "https://github.com/zzzhengqi/opus-5-5-overnight-builds"}] },
       { name: "蒸汽会员专属资源库（本站）", status: "done", tags: ["网页", "交互动效", "数据驱动"],
         desc: "你正在看的这个资源库，本身就是用 AI 对话式编程做出来的：折叠屏展开动画、可拖动排序的图标、全局搜索、分类筛选。所有内容都写在一个 data.js 文件里，改内容不用碰页面代码。适合学习：怎样把一份资料整理成好看、好找、方便持续更新的网页。",
         links: [] },
-      { name: "说明书转 3D 演示", status: "plan", tags: ["Three.js", "交互"],
-        desc: "把家具组装说明书变成可交互的 3D 网页。适合学习：从参考作品出发，拆解并复刻一个效果。",
-        links: [{"label": "源码", "url": ""}] }
+      { name: "家具说明书变成 3D 装配演示", status: "done", tags: ["Three.js", "3D 说明书", "附 Agent 技能"],
+        desc: "把纸质 / PDF 的家具装配说明书，做成能一步步播放的 3D 装配演示：逐步动画、每一步用到的五金数量、说明书原页对照、放大细节圈、线稿视图，中英文界面都有。在线演示用的是宜家 KALLAX 置物架（主体、门嵌件、抽屉嵌件、全套、靠墙摆放）。源码里附带一个 Agent 技能：新建文件夹，把你的说明书 PDF 放进 inputs 文件夹，再把源码页“三步开始”里的那段话发给 Claude Code 或 Codex，它就会照着流程做出你自己的 3D 说明书。演示仅作示意，实际安装以官方说明书为准；本演示与宜家无关。",
+        links: [{"label": "在线查看", "url": "https://zzzhengqi.github.io/flatpack3d-demo/", "pri": true}, {"label": "源码", "url": "https://github.com/zzzhengqi/FlatPack3D"}] }
     ] },
 
   { id: "live", group: "资料", icon: "🎬", title: "直播与回放", type: "videos",
