@@ -164,9 +164,11 @@
       W.map = '<button class="wg w-map" type="button" data-w="map" data-open="map" style="--i:1"><div class="wh">30 天学习地图</div><ol>' +
         map.items.map(function (w, i) { return '<li><span>' + esc(w.w) + '</span><i style="--p:' + (100 - i * 18) + "%;--dl:" + (0.5 + i * 0.12) + 's"></i></li>'; }).join("") + "</ol></button>";
     }
-    W.stats = '<button class="wg w-stats" type="button" data-w="stats" data-open="course" style="--i:2"><div class="wh">资源总览</div><div class="nums">' +
-      [[course ? course.items.length : 0, "节主修课"], [SEC.prompts ? SEC.prompts.items.length : 0, "条提示词"], [SEC.cases ? SEC.cases.items.length : countOf("projects"), SEC.cases ? "个场景案例" : "个案例"], [total, "条资料"]]
-        .map(function (n) { return '<div><b data-count="' + n[0] + '">0</b><span>' + n[1] + "</span></div>"; }).join("") + "</div></button>";
+    /* 资源总览：四个数字各自跳到对应板块；“条资料”打开全局搜索 */
+    W.stats = '<div class="wg w-stats" data-w="stats" style="--i:2"><div class="wh">资源总览</div><div class="nums">' +
+      [[course ? course.items.length : 0, "节主修课", ' data-open="course"'], [SEC.prompts ? SEC.prompts.items.length : 0, "条提示词", ' data-open="prompts"'],
+       [SEC.cases ? SEC.cases.items.length : countOf("projects"), SEC.cases ? "个场景案例" : "个案例", SEC.cases ? ' data-open="cases"' : ' data-open="projects"'], [total, "条资料", ' data-spot="1"']]
+        .map(function (n) { return '<button class="stat" type="button"' + n[2] + ' aria-label="' + n[0] + n[1] + '"><b data-count="' + n[0] + '">0</b><span>' + n[1] + "</span></button>"; }).join("") + "</div></div>";
     if (prompts && prompts.items.length) {
       var day = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
       var pi = day % prompts.items.length, p = prompts.items[pi];

@@ -183,7 +183,7 @@ svg{display:block}
 @keyframes bar{from{transform:scaleX(0)}}
 .w-stats .nums{display:grid;grid-template-columns:1fr 1fr;gap:.6em .8em;margin-top:.7em}
 .w-stats b{display:block;font-size:2em;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink)}
-.w-stats div:nth-child(1) b{color:#f26b1d}.w-stats div:nth-child(2) b{color:#0a84ff}.w-stats div:nth-child(3) b{color:#30b158}
+.w-stats .stat:nth-child(1) b{color:#f26b1d}.w-stats .stat:nth-child(2) b{color:#0a84ff}.w-stats .stat:nth-child(3) b{color:#30b158}
 .w-stats span{font-size:.75em;color:var(--ink2)}
 .w-prompt{grid-column:span 2}
 .w-prompt .pt{font-size:1.15em;font-weight:700;margin:.45em 0 .2em}
@@ -507,3 +507,10 @@ details .ans .codebox{margin-top:10px}
 .card .more{margin-top:auto}
 .card .more ~ .links{margin-top:0}
 .sr-tools{display:flex;flex-wrap:wrap;gap:8px}
+
+/* 资源总览：每个数字都可以单独点击 */
+.w-stats .stat{all:unset;box-sizing:border-box;display:block;cursor:pointer;border-radius:.7em;padding:.25em .35em;margin:-.25em -.35em;transition:background .2s,transform .2s}
+.w-stats .stat:hover{background:rgba(255,255,255,.75);transform:translateY(-1px)}
+.w-stats .stat:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+.w-stats .stat span{display:block}
+.w-stats .stat:hover span{color:var(--accent2)}
