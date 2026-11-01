@@ -8,7 +8,7 @@
    ===================================================================== */
 window.SITE = {
   title: "蒸汽会员专属资源库",
-  updated: "2026-10-31",
+  updated: "2026-11-01",
   sections: [
 
   /* ================= 开始 ================= */
@@ -292,7 +292,10 @@ window.SITE = {
         links: [] },
       { name: "家具说明书变成 3D 装配演示", status: "done", tags: ["Three.js", "3D 说明书", "附 Agent 技能"],
         desc: "把纸质 / PDF 的家具装配说明书，做成能一步步播放的 3D 装配演示：逐步动画、每一步用到的五金数量、说明书原页对照、放大细节圈、线稿视图，中英文界面都有。在线演示用的是宜家 KALLAX 置物架（主体、门嵌件、抽屉嵌件、全套、靠墙摆放）。源码里附带一个 Agent 技能：新建文件夹，把你的说明书 PDF 放进 inputs 文件夹，再把源码页“三步开始”里的那段话发给 Claude Code 或 Codex，它就会照着流程做出你自己的 3D 说明书。演示仅作示意，实际安装以官方说明书为准；本演示与宜家无关。",
-        links: [{"label": "在线查看", "url": "https://zzzhengqi.github.io/flatpack3d-demo/", "pri": true}, {"label": "源码", "url": "https://github.com/zzzhengqi/FlatPack3D"}] }
+        links: [{"label": "在线查看", "url": "https://zzzhengqi.github.io/flatpack3d-demo/", "pri": true}, {"label": "源码", "url": "https://github.com/zzzhengqi/FlatPack3D"}] },
+      { name: "DeepSeek Harness 动态皮肤：启动动画和夜航主题", status: "done", tags: ["插件", "WebGL 动画", "原创形象"],
+        desc: "给 DeepSeek Harness 桌面版 / 网页版换上一整套动态外观：打开时播放一段约 8 秒的启动动画（线稿起笔 → 上色 → 睁眼），之后工作台背后常驻一个会呼吸、眨眼、目光跟随鼠标的原创人物立绘，界面换成深蓝夜航配色，还有飘动的萤火和极光。不改软件本体，以插件方式安装，随时关闭就能恢复原样。安装：打开 DeepSeek Harness 侧边栏「插件」→「添加插件」→ 安装源选 npm 官方源，输入 dsh-firefly-skin，装好后刷新或重启。适合学习：怎样用 Agent 把一套动画移植到另一个软件里做成插件。代码是 MIT 协议；人物美术素材是 CC BY-NC 4.0，可以免费使用和二次创作，但需要署名，不能商用。",
+        links: [{"label": "安装说明", "url": "https://github.com/zzzhengqi/dsh-firefly-skin", "pri": true}, {"label": "下载", "url": "https://github.com/zzzhengqi/dsh-firefly-skin/releases"}] }
     ] },
 
   { id: "live", group: "资料", icon: "🎬", title: "直播与回放", type: "videos",
