@@ -88,7 +88,7 @@
     prompts: function (it) { return { tag: "div", cls: "card" + wide(it), html: '<div class="row"><h3>' + esc(it.title) + "</h3>" + (it.meta || it.tag ? '<span class="tag">' + esc(it.meta || it.tag) + "</span>" : "") + "</div><p>" + esc(it.desc) + "</p>" + code(it.text) }; },
     lessons: function (it, i, sec) {
       var no = (sec.noLabel || "第{n}课").replace("{n}", i + 1);
-      var b = '<div class="goal">目标：' + esc(it.goal) + "</div><h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4><p>" + esc(it.practice) + "</p><h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
+      var b = '<div class="goal">目标：' + esc(it.goal) + "</div>" + (it.demoUrl ? '<div class="links">' + btn("打开安装演示", it.demoUrl, true) + "</div>" : "") + "<h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4><p>" + esc(it.practice) + "</p><h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
       return { tag: "details", cls: "", html: '<summary><span class="no">' + esc(no) + '</span><span class="tt">' + esc(it.title) + '</span></summary><div class="ans">' + b + "</div>" };
     },
     faq: function (it) { return { tag: "details", cls: "", html: '<summary><span class="tt">' + esc(it.q) + '</span></summary><div class="ans">' + it.a + "</div>" }; },
