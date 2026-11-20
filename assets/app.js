@@ -77,7 +77,7 @@
     cards: function (it) { return { tag: "div", cls: "card" + (it.slot ? " slot" : "") + (it.hl ? " hl" : "") + wide(it), html: "<h3>" + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" + extra(it) }; },
     plan: function (it) { return { tag: "div", cls: "card", html: '<h3><span class="wk">' + esc(it.w) + "</span>" + esc(it.t) + "</h3>" + ul(it.list) }; },
     steps: function (it, i) {
-      return { tag: "div", cls: "step", html: '<div class="num">' + (i + 1) + '</div><div class="body"><h3>' + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" + (it.code ? code(it.code) : "") + ul(it.list) + "</div>" };
+      return { tag: "div", cls: "step", html: '<div class="num">' + (i + 1) + '</div><div class="body"><h3>' + esc(it.t) + "</h3><p>" + esc(it.d) + "</p>" + (it.code ? code(it.code) : "") + ul(it.list) + (it.links ? '<div class="links">' + it.links.map(function (l) { return btn(l.label, l.url, false); }).join("") + "</div>" : "") + "</div>" };
     },
     links: function (it) { return { tag: "div", cls: "card" + (it.hl ? " hl" : "") + wide(it), html: '<div class="row"><h3>' + esc(it.name) + '</h3><span class="tag">' + esc(it.tag) + "</span></div><p>" + esc(it.desc) + "</p>" + extra(it) + (it.links ? '<div class="links">' + it.links.map(function (l) { return btn(l.label, l.url, false); }).join("") + "</div>" : it.noBtn ? "" : '<div class="links">' + btn(it.btn || "打开官网", it.url, true) + "</div>") }; },
     projects: function (it) {
