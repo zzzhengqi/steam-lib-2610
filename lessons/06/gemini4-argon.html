@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AI 对话式编程：从一句需求，到一个能验收的结果 — 30s 动态概念海报</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #05070D;
+      --bg-midnight: #0B1120;
+      --bg-indigo: #111936;
+      --amber-core: #FF6B2B;
+      --amber-gold: #FFB347;
+      --amber-champagne: #FFE2B8;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #475569;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #020408;
+      font-family: "Plus Jakarta Sans", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Ambient surround glow outside the 9:16 stage on widescreen monitors */
+    .viewport-ambient {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 107, 43, 0.09) 0%, rgba(11, 17, 32, 0.45) 45%, #020408 80%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 1080x1920 Fixed Coordinate Stage scaled dynamically via JS */
+    #stage-wrapper {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      flex-shrink: 0;
+      transform-origin: center center;
+      border-radius: 28px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #05070D 0%, #091022 48%, #0F172A 100%);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 40px 140px rgba(0, 0, 0, 0.9),
+        0 0 120px rgba(255, 107, 43, 0.08);
+      z-index: 1;
+    }
+
+    /* In fullscreen or exact 9:16 match, remove rounded corners */
+    body.clean-frame #stage-wrapper {
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    /* Subtle film grain & architectural grid overlay */
+    .stage-grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+      background-size: 90px 90px;
+      mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 20%, transparent 90%);
+      -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 20%, transparent 90%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .stage-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 85% 85% at 50% 50%, transparent 52%, rgba(3, 5, 10, 0.78) 100%);
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    /* Breathing Warm Aura Layer */
+    #breathing-aura {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 960px;
+      height: 960px;
+      margin-left: -480px;
+      margin-top: -480px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255, 107, 43, 0.34) 0%,
+        rgba(255, 179, 71, 0.16) 35%,
+        rgba(255, 107, 43, 0.04) 62%,
+        transparent 78%
+      );
+      filter: blur(75px);
+      pointer-events: none;
+      z-index: 1;
+      will-change: transform, opacity;
+    }
+
+    #secondary-aura {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 1100px;
+      height: 1100px;
+      margin-left: -550px;
+      margin-top: -550px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(56, 189, 248, 0.08) 0%,
+        rgba(99, 102, 241, 0.06) 45%,
+        transparent 75%
+      );
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 1;
+      will-change: transform, opacity;
+    }
+
+    /* Main 1080x1920 Particle & Light-Trail Canvas */
+    #fx-canvas {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1920px;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* Persistent Ambient Editorial Frame (Top & Bottom telemetry) */
+    .editorial-header {
+      position: absolute;
+      top: 138px;
+      left: 84px;
+      right: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 15;
+      pointer-events: none;
+      opacity: 0.72;
+    }
+
+    .editorial-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 22px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      backdrop-filter: blur(16px);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #CBD5E1;
+      text-transform: uppercase;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #FF6B2B;
+      box-shadow: 0 0 16px #FF6B2B, 0 0 30px #FFB347;
+    }
+
+    /* Top Minimal Floating HUD Control Pill */
+    #hud-controls {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(9, 13, 24, 0.68);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transition: opacity 0.35s var(--ease-out-expo), transform 0.35s var(--ease-out-expo);
+    }
+
+    #hud-controls:hover {
+      border-color: rgba(255, 179, 71, 0.35);
+      background: rgba(9, 13, 24, 0.85);
+    }
+
+    body.hud-hidden #hud-controls {
+      opacity: 0.08;
+    }
+    body.hud-hidden #hud-controls:hover {
+      opacity: 1;
+    }
+
+    .hud-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(255, 255, 255, 0.05);
+      color: #F8FAFC;
+      font-size: 21px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.22s var(--ease-out-expo);
+    }
+
+    .hud-btn:hover {
+      background: rgba(255, 107, 43, 0.22);
+      border-color: rgba(255, 179, 71, 0.5);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255, 107, 43, 0.25);
+    }
+
+    .hud-btn:active {
+      transform: scale(0.96);
+    }
+
+    .hud-btn.hud-btn-accent {
+      background: linear-gradient(135deg, rgba(255, 107, 43, 0.28), rgba(255, 179, 71, 0.16));
+      border-color: rgba(255, 179, 71, 0.4);
+      color: #FFE2B8;
+    }
+
+    .hud-divider {
+      width: 1px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.14);
+      margin: 0 4px;
+    }
+
+    .hud-shots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 6px;
+    }
+
+    .shot-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: #94A3B8;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 16px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.22s var(--ease-out-expo);
+    }
+
+    .shot-dot:hover {
+      color: #FFFFFF;
+      border-color: rgba(255, 179, 71, 0.5);
+      background: rgba(255, 107, 43, 0.2);
+    }
+
+    .shot-dot.active {
+      background: linear-gradient(135deg, #FF6B2B, #FFB347);
+      color: #05070D;
+      border-color: transparent;
+      box-shadow: 0 0 16px rgba(255, 107, 43, 0.6);
+      transform: scale(1.08);
+    }
+
+    .hud-timecode {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 19px;
+      font-weight: 600;
+      color: #94A3B8;
+      padding: 0 10px 0 4px;
+      min-width: 138px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Scene Layer Base */
+    .shots-container {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .shot-scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 84px;
+      opacity: 0;
+      visibility: hidden;
+      will-change: transform, opacity, filter;
+    }
+
+    .shot-scene.is-visible {
+      visibility: visible;
+    }
+
+    /* Gradient Text Helpers */
+    .text-amber-gradient {
+      background: linear-gradient(135deg, #FF6B2B 0%, #FFB347 52%, #FFF0D6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .text-white-gold {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 55%, #FFD8A8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* ==========================================
+       SHOT 1 (0 - 4s): 叩问痛点
+       ========================================== */
+    .s1-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 28px;
+      border-radius: 999px;
+      background: rgba(255, 107, 43, 0.12);
+      border: 1px solid rgba(255, 179, 71, 0.32);
+      color: #FFB347;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 52px;
+      box-shadow: 0 0 40px rgba(255, 107, 43, 0.18);
+    }
+
+    .s1-headline {
+      text-align: center;
+      font-size: 76px;
+      font-weight: 900;
+      line-height: 1.24;
+      letter-spacing: -0.025em;
+      color: #F8FAFC;
+      text-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+    }
+
+    .s1-headline-line {
+      display: block;
+      will-change: transform, opacity, filter;
+    }
+
+    .s1-highlight-wrap {
+      position: relative;
+      display: inline-block;
+      padding: 0 6px;
+    }
+
+    .s1-underline {
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      bottom: -8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #FF6B2B, #FFB347, transparent);
+      box-shadow: 0 0 28px rgba(255, 107, 43, 0.85);
+      transform-origin: left center;
+    }
+
+    /* ==========================================
+       SHOT 2 (4 - 9s): 发光对话框 + 打字机
+       ========================================== */
+    .s2-dialog-emblem-wrap {
+      position: relative;
+      width: 176px;
+      height: 176px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 64px;
+    }
+
+    .s2-ripple {
+      position: absolute;
+      inset: 0;
+      border-radius: 46px;
+      border: 1.5px solid rgba(255, 138, 76, 0.45);
+      pointer-events: none;
+    }
+
+    .s2-dialog-icon-box {
+      position: relative;
+      width: 148px;
+      height: 148px;
+      border-radius: 40px;
+      background: linear-gradient(145deg, rgba(255, 107, 43, 0.32) 0%, rgba(255, 179, 71, 0.12) 48%, rgba(15, 23, 42, 0.9) 100%);
+      border: 2px solid rgba(255, 179, 71, 0.65);
+      box-shadow:
+        0 24px 70px rgba(255, 107, 43, 0.42),
+        0 0 50px rgba(255, 179, 71, 0.28),
+        inset 0 2px 16px rgba(255, 255, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(20px);
+    }
+
+    .s2-prompt-card {
+      width: 912px;
+      border-radius: 40px;
+      padding: 64px 64px 68px;
+      background: linear-gradient(165deg, rgba(19, 28, 49, 0.82) 0%, rgba(9, 13, 24, 0.92) 100%);
+      border: 1.5px solid rgba(255, 179, 71, 0.28);
+      box-shadow:
+        0 36px 100px rgba(0, 0, 0, 0.72),
+        0 0 80px rgba(255, 107, 43, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(28px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .s2-prompt-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #FF6B2B, #FFB347, transparent);
+      opacity: 0.85;
+    }
+
+    .s2-prompt-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .s2-terminal-dots {
+      display: flex;
+      gap: 10px;
+    }
+
+    .s2-terminal-dots span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .s2-typewriter-area {
+      min-height: 210px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .s2-line-1 {
+      font-size: 50px;
+      font-weight: 700;
+      color: #94A3B8;
+      line-height: 1.3;
+      letter-spacing: -0.015em;
+    }
+
+    .s2-line-2 {
+      font-size: 58px;
+      font-weight: 900;
+      color: #F8FAFC;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 16px;
+      height: 52px;
+      vertical-align: -8px;
+      margin-left: 8px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #FF6B2B, #FFB347);
+      box-shadow: 0 0 24px #FF6B2B;
+      animation: cursorBlink 0.75s infinite;
+    }
+
+    @keyframes cursorBlink {
+      0%, 48% { opacity: 1; }
+      52%, 100% { opacity: 0.15; }
+    }
+
+    /* ==========================================
+       SHOT 3 (9 - 15s): 左右强烈对比卡片
+       ========================================== */
+    .s3-stage-header {
+      text-align: center;
+      margin-bottom: 54px;
+    }
+
+    .s3-split-grid {
+      width: 936px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: stretch;
+      position: relative;
+    }
+
+    .s3-card {
+      border-radius: 38px;
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      will-change: transform, opacity, filter;
+    }
+
+    /* Left Legacy Card (Cold Slate) */
+    .s3-card-legacy {
+      background: linear-gradient(170deg, rgba(18, 24, 38, 0.82) 0%, rgba(10, 14, 23, 0.92) 100%);
+      border: 1.5px solid rgba(148, 163, 184, 0.16);
+      box-shadow:
+        0 28px 70px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    /* Right AI Conversational Card (Warm Radiant Amber) */
+    .s3-card-ai {
+      background: linear-gradient(165deg, rgba(255, 107, 43, 0.22) 0%, rgba(255, 179, 71, 0.08) 42%, rgba(15, 23, 42, 0.92) 100%);
+      border: 2px solid rgba(255, 158, 94, 0.62);
+      box-shadow:
+        0 34px 95px rgba(255, 107, 43, 0.28),
+        0 0 60px rgba(255, 179, 71, 0.16),
+        inset 0 1px 22px rgba(255, 210, 160, 0.2);
+    }
+
+    .s3-card-ai::before {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 138, 76, 0.35), transparent 70%);
+      filter: blur(30px);
+      pointer-events: none;
+    }
+
+    .s3-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      width: fit-content;
+      margin-bottom: 24px;
+    }
+
+    .s3-badge-legacy {
+      background: rgba(71, 85, 105, 0.28);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: #94A3B8;
+    }
+
+    .s3-badge-ai {
+      background: rgba(255, 107, 43, 0.24);
+      border: 1px solid rgba(255, 179, 71, 0.5);
+      color: #FFE2B8;
+      box-shadow: 0 0 24px rgba(255, 107, 43, 0.3);
+    }
+
+    .s3-card-title {
+      font-size: 46px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      margin-bottom: 38px;
+    }
+
+    .s3-steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+
+    .s3-step-node {
+      border-radius: 24px;
+      padding: 24px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+    }
+
+    .s3-step-legacy {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      color: #94A3B8;
+    }
+
+    .s3-step-ai {
+      background: linear-gradient(135deg, rgba(255, 107, 43, 0.24) 0%, rgba(30, 41, 59, 0.78) 100%);
+      border: 1.5px solid rgba(255, 179, 71, 0.45);
+      color: #FFFFFF;
+      box-shadow: 0 14px 36px rgba(255, 107, 43, 0.18);
+    }
+
+    .s3-arrow-down {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      color: #64748B;
+    }
+
+    .s3-arrow-down.ai-arrow {
+      color: #FFB347;
+      filter: drop-shadow(0 0 10px rgba(255, 107, 43, 0.8));
+    }
+
+    /* ==========================================
+       SHOT 4 (15 - 21s): 金色光轨 + 三个数据胶囊
+       ========================================== */
+    .s4-capsules-stack {
+      width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 34px;
+      position: relative;
+      z-index: 12;
+    }
+
+    .s4-capsule {
+      position: relative;
+      border-radius: 40px;
+      padding: 42px 52px;
+      background: linear-gradient(160deg, rgba(24, 33, 56, 0.82) 0%, rgba(11, 16, 30, 0.92) 100%);
+      border: 1.5px solid rgba(255, 179, 71, 0.42);
+      box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.68),
+        0 0 50px rgba(255, 107, 43, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(26px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      will-change: transform, opacity, filter;
+    }
+
+    .s4-capsule::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 18%;
+      bottom: 18%;
+      width: 6px;
+      border-radius: 0 8px 8px 0;
+      background: linear-gradient(180deg, #FF6B2B, #FFB347);
+      box-shadow: 0 0 24px #FF6B2B;
+    }
+
+    .s4-metric-num {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 74px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+      min-width: 240px;
+    }
+
+    .s4-capsule-copy {
+      flex: 1;
+      padding-left: 24px;
+    }
+
+    .s4-capsule-title {
+      font-size: 48px;
+      font-weight: 900;
+      color: #F8FAFC;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .s4-capsule-sub {
+      font-size: 23px;
+      font-weight: 500;
+      color: #94A3B8;
+      letter-spacing: 0.02em;
+    }
+
+    .s4-capsule-icon {
+      width: 84px;
+      height: 84px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, rgba(255, 107, 43, 0.25), rgba(255, 179, 71, 0.1));
+      border: 1px solid rgba(255, 179, 71, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFB347;
+      box-shadow: 0 0 30px rgba(255, 107, 43, 0.22);
+      flex-shrink: 0;
+    }
+
+    /* ==========================================
+       SHOT 5 (21 - 26s): 粒子汇聚 + 大字逐字高亮
+       ========================================== */
+    .s5-manifesto-wrap {
+      width: 940px;
+      text-align: center;
+      position: relative;
+    }
+
+    .s5-core-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 680px;
+      height: 680px;
+      margin-left: -340px;
+      margin-top: -340px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 179, 71, 0.22);
+      box-shadow:
+        0 0 120px rgba(255, 107, 43, 0.2),
+        inset 0 0 80px rgba(255, 107, 43, 0.12);
+      pointer-events: none;
+    }
+
+    .s5-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      line-height: 1.32;
+    }
+
+    .s5-line-1 {
+      font-size: 76px;
+      font-weight: 900;
+      margin-bottom: 28px;
+      letter-spacing: -0.02em;
+    }
+
+    .s5-line-2 {
+      font-size: 82px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .s5-char {
+      display: inline-block;
+      will-change: transform, opacity, filter, color, text-shadow;
+      transition: none;
+    }
+
+    .s5-char-agent {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-weight: 800;
+      padding: 0 14px;
+      margin-right: 6px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255, 107, 43, 0.28), rgba(255, 179, 71, 0.14));
+      border: 1.5px solid rgba(255, 179, 71, 0.55);
+    }
+
+    /* ==========================================
+       SHOT 6 (26 - 30s): 极简高级结语卡片 + 进度条
+       ========================================== */
+    .s6-finale-card {
+      width: 896px;
+      border-radius: 48px;
+      padding: 84px 72px 72px;
+      background: linear-gradient(165deg, rgba(19, 27, 46, 0.86) 0%, rgba(7, 10, 19, 0.96) 100%);
+      border: 1.5px solid rgba(255, 179, 71, 0.42);
+      box-shadow:
+        0 48px 130px rgba(0, 0, 0, 0.85),
+        0 0 90px rgba(255, 107, 43, 0.2),
+        inset 0 2px 0 rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(32px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .s6-finale-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 15%;
+      right: 15%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #FF6B2B, #FFE2B8, #FF6B2B, transparent);
+      box-shadow: 0 0 30px #FF6B2B;
+    }
+
+    .s6-crest {
+      width: 112px;
+      height: 112px;
+      border-radius: 32px;
+      background: linear-gradient(145deg, rgba(255, 107, 43, 0.28), rgba(255, 179, 71, 0.08));
+      border: 1.5px solid rgba(255, 179, 71, 0.55);
+      box-shadow:
+        0 20px 50px rgba(255, 107, 43, 0.32),
+        inset 0 1px 12px rgba(255, 255, 255, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 44px;
+    }
+
+    .s6-overline {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      color: #FFB347;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .s6-main-title {
+      font-size: 62px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      color: #FFFFFF;
+      line-height: 1.25;
+      margin-bottom: 18px;
+    }
+
+    .s6-sub-title {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 44px;
+    }
+
+    .s6-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+      margin-bottom: 40px;
+    }
+
+    .s6-theme-quote {
+      font-size: 28px;
+      font-weight: 500;
+      color: #94A3B8;
+      letter-spacing: 0.04em;
+      margin-bottom: 52px;
+    }
+
+    /* Finale Progress Bar Container */
+    .s6-progress-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .s6-progress-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 20px;
+      font-weight: 600;
+      color: #94A3B8;
+    }
+
+    .s6-progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .s6-progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #FF6B2B 0%, #FFB347 70%, #FFF4E0 100%);
+      box-shadow: 0 0 24px rgba(255, 107, 43, 0.9);
+      position: relative;
+    }
+
+    /* Bottom Persistent 30s Master Timeline Bar */
+    .master-footer {
+      position: absolute;
+      bottom: 72px;
+      left: 84px;
+      right: 84px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      pointer-events: none;
+    }
+
+    .master-footer-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 20px;
+      color: rgba(148, 163, 184, 0.72);
+      letter-spacing: 0.06em;
+    }
+
+    .master-segments {
+      display: grid;
+      grid-template-columns: 4fr 5fr 6fr 6fr 5fr 4fr;
+      gap: 10px;
+      width: 100%;
+      height: 6px;
+    }
+
+    .master-seg {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .master-seg-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #FF6B2B, #FFB347);
+      box-shadow: 0 0 12px rgba(255, 107, 43, 0.8);
+    }
+
+    /* Export Recording Toast Banner */
+    #export-overlay-badge {
+      position: absolute;
+      top: 122px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 120;
+      padding: 12px 28px;
+      border-radius: 999px;
+      background: rgba(255, 107, 43, 0.92);
+      color: #05070D;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 0.04em;
+      box-shadow: 0 12px 40px rgba(255, 107, 43, 0.5);
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Surround Ambient Glow -->
+  <div class="viewport-ambient"></div>
+
+  <!-- 1080 x 1920 Vertical Poster Stage -->
+  <div id="stage-wrapper">
+    <!-- Breathing Radial Light Auras -->
+    <div id="breathing-aura"></div>
+    <div id="secondary-aura"></div>
+
+    <!-- Subtle Architectural Grid & Vignette -->
+    <div class="stage-grid-overlay"></div>
+    <div class="stage-vignette"></div>
+
+    <!-- High-DPI Particle & Golden Light-Trail Canvas -->
+    <canvas id="fx-canvas" width="1080" height="1920"></canvas>
+
+    <!-- Top Floating Minimal Control Pill (Play/Pause, Restart, Shot Jump, Video Export) -->
+    <div id="hud-controls" title="快捷键：空格 暂停/播放 | R 重播 | 数字 1-6 切换镜头">
+      <button id="btn-toggle-play" class="hud-btn" type="button">
+        <span id="icon-play-state" style="display:flex;align-items:center;">
+          <!-- Pause Icon (default playing) -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4.5" height="16" rx="1.5"></rect>
+            <rect x="13.5" y="4" width="4.5" height="16" rx="1.5"></rect>
+          </svg>
+        </span>
+        <span id="label-play-state">暂停</span>
+      </button>
+
+      <button id="btn-restart" class="hud-btn" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+        <span>重播</span>
+      </button>
+
+      <div class="hud-divider"></div>
+
+      <!-- 6 Shot Direct Jump Buttons -->
+      <div class="hud-shots">
+        <button class="shot-dot active" data-shot="0" title="镜头1 (0-4s)">1</button>
+        <button class="shot-dot" data-shot="1" title="镜头2 (4-9s)">2</button>
+        <button class="shot-dot" data-shot="2" title="镜头3 (9-15s)">3</button>
+        <button class="shot-dot" data-shot="3" title="镜头4 (15-21s)">4</button>
+        <button class="shot-dot" data-shot="4" title="镜头5 (21-26s)">5</button>
+        <button class="shot-dot" data-shot="5" title="镜头6 (26-30s)">6</button>
+      </div>
+
+      <div class="hud-divider"></div>
+
+      <div id="hud-timecode" class="hud-timecode">00.0s / 30.0s</div>
+
+      <button id="btn-export-video" class="hud-btn hud-btn-accent" type="button" title="直接录制并导出 1080×1920 高清视频文件">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span id="label-export">导出视频</span>
+      </button>
+    </div>
+
+    <div id="export-overlay-badge">
+      <span style="width:12px;height:12px;border-radius:50%;background:#05070D;display:inline-block;"></span>
+      <span id="export-status-text">正在生成 1080×1920 视频...</span>
+    </div>
+
+    <!-- Ambient Top Telemetry Header -->
+    <div class="editorial-header">
+      <div class="editorial-pill">
+        <span class="pulse-dot"></span>
+        <span>AI CONVERSATIONAL CODING</span>
+      </div>
+      <div id="shot-tag-indicator" class="editorial-pill">
+        SCENE 01 / 06
+      </div>
+    </div>
+
+    <!-- ==========================================
+         ALL 6 SHOTS STAGE CONTAINER
+         ========================================== -->
+    <div class="shots-container">
+
+      <!-- 镜头 1 (0 - 4s): 深邃午夜蓝渐变 + 暖橙呼吸光晕 + 居中弹性大字 -->
+      <section id="shot-1" class="shot-scene">
+        <div id="s1-kicker" class="s1-kicker">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+          <span>AI 对话式编程 · 认知破局</span>
+        </div>
+
+        <h1 class="s1-headline">
+          <span id="s1-line-1" class="s1-headline-line" style="margin-bottom: 18px;">
+            普通人做软件，
+          </span>
+          <span id="s1-line-2" class="s1-headline-line">
+            <span class="s1-highlight-wrap">
+              <span class="text-amber-gradient">最大的门槛</span>
+              <span id="s1-underline" class="s1-underline"></span>
+            </span>是什么？
+          </span>
+        </h1>
+      </section>
+
+      <!-- 镜头 2 (4 - 9s): 发光对话框图标 + 打字机逐字打出 -->
+      <section id="shot-2" class="shot-scene">
+        <div id="s2-icon-wrap" class="s2-dialog-emblem-wrap">
+          <div id="s2-ripple-1" class="s2-ripple"></div>
+          <div id="s2-ripple-2" class="s2-ripple"></div>
+          <div class="s2-dialog-icon-box">
+            <svg width="74" height="74" viewBox="0 0 24 24" fill="none" stroke="url(#amberGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <defs>
+                <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#FFE2B8" />
+                  <stop offset="50%" stop-color="#FFB347" />
+                  <stop offset="100%" stop-color="#FF6B2B" />
+                </linearGradient>
+              </defs>
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              <path d="M9.5 10.5h5" stroke="#FFF" stroke-width="2.2"/>
+              <path d="M9.5 14h3" stroke="#FFB347" stroke-width="2.2"/>
+            </svg>
+          </div>
+        </div>
+
+        <div id="s2-prompt-box" class="s2-prompt-card">
+          <div class="s2-prompt-topbar">
+            <div class="s2-terminal-dots">
+              <span style="background:#FF5F56;"></span>
+              <span style="background:#FFBD2E;"></span>
+              <span style="background:#27C93F;"></span>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:20px;color:#FFB347;letter-spacing:0.08em;">
+              PROMPT // FIRST_CONVERSATION
+            </div>
+          </div>
+
+          <div class="s2-typewriter-area">
+            <div class="s2-line-1">
+              <span id="s2-typed-1"></span><span id="s2-cursor-1" class="typing-cursor"></span>
+            </div>
+            <div class="s2-line-2">
+              <span id="s2-typed-2-prefix"></span><span id="s2-typed-2-highlight" class="text-amber-gradient"></span><span id="s2-cursor-2" class="typing-cursor" style="display:none;"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 镜头 3 (9 - 15s): 画面一分为二 · 传统方式 vs 对话式编程 -->
+      <section id="shot-3" class="shot-scene">
+        <div id="s3-header" class="s3-stage-header">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:22px;color:#FFB347;letter-spacing:0.18em;margin-bottom:14px;">
+            PARADIGM SHIFT
+          </div>
+          <h2 style="font-size:56px;font-weight:900;letter-spacing:-0.02em;color:#F8FAFC;">
+            从“迁就机器语法”到“直达业务结果”
+          </h2>
+        </div>
+
+        <div class="s3-split-grid">
+          <!-- 左侧暗灰卡片：传统方式 -->
+          <div id="s3-left-card" class="s3-card s3-card-legacy">
+            <div>
+              <div class="s3-badge s3-badge-legacy">
+                <span>LEGACY MODE</span>
+              </div>
+              <div class="s3-card-title" style="color:#94A3B8;">传统方式</div>
+
+              <div class="s3-steps-list">
+                <div id="s3-l-step1" class="s3-step-node s3-step-legacy">
+                  <div style="width:48px;height:48px;border-radius:14px;background:rgba(148,163,184,0.12);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#64748B;">01</div>
+                  <div>
+                    <div style="font-size:34px;font-weight:800;color:#CBD5E1;">学语法</div>
+                    <div style="font-size:20px;color:#64748B;margin-top:4px;">记忆复杂语言规则与框架</div>
+                  </div>
+                </div>
+
+                <div class="s3-arrow-down">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 5v14M19 12l-7 7-7-7"/>
+                  </svg>
+                </div>
+
+                <div id="s3-l-step2" class="s3-step-node s3-step-legacy">
+                  <div style="width:48px;height:48px;border-radius:14px;background:rgba(148,163,184,0.12);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#64748B;">02</div>
+                  <div>
+                    <div style="font-size:34px;font-weight:800;color:#CBD5E1;">写代码</div>
+                    <div style="font-size:20px;color:#64748B;margin-top:4px;">逐行手敲样板与底层逻辑</div>
+                  </div>
+                </div>
+
+                <div class="s3-arrow-down">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 5v14M19 12l-7 7-7-7"/>
+                  </svg>
+                </div>
+
+                <div id="s3-l-step3" class="s3-step-node s3-step-legacy">
+                  <div style="width:48px;height:48px;border-radius:14px;background:rgba(239,68,68,0.14);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#F87171;">03</div>
+                  <div>
+                    <div style="font-size:34px;font-weight:800;color:#CBD5E1;">改报错</div>
+                    <div style="font-size:20px;color:#64748B;margin-top:4px;">在环境配置与 Bug 中内耗</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding:20px 24px;border-radius:20px;background:rgba(15,23,42,0.8);border:1px solid rgba(148,163,184,0.1);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:22px;color:#64748B;font-weight:600;">周期漫长 · 极易半途放弃</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:20px;color:#64748B;">HIGH BARRIER</span>
+            </div>
+          </div>
+
+          <!-- 右侧暖橙发光卡片：对话式编程 -->
+          <div id="s3-right-card" class="s3-card s3-card-ai">
+            <div>
+              <div class="s3-badge s3-badge-ai">
+                <span class="pulse-dot" style="width:8px;height:8px;"></span>
+                <span>AI NATIVE</span>
+              </div>
+              <div class="s3-card-title text-white-gold">对话式编程</div>
+
+              <div class="s3-steps-list" style="gap: 26px; margin-top: 24px;">
+                <div id="s3-r-step1" class="s3-step-node s3-step-ai" style="padding: 34px 28px;">
+                  <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#FF6B2B,#FFB347);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:800;color:#05070D;box-shadow:0 0 24px rgba(255,107,43,0.6);">01</div>
+                  <div>
+                    <div style="font-size:38px;font-weight:900;color:#FFFFFF;">说清需求</div>
+                    <div style="font-size:22px;color:#FFE2B8;margin-top:6px;opacity:0.9;">用母语描述目标与使用场景</div>
+                  </div>
+                </div>
+
+                <div class="s3-arrow-down ai-arrow" style="height: 36px;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M12 4v16M19 13l-7 7-7-7"/>
+                  </svg>
+                </div>
+
+                <div id="s3-r-step2" class="s3-step-node s3-step-ai" style="padding: 34px 28px;">
+                  <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#FF6B2B,#FFB347);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:800;color:#05070D;box-shadow:0 0 24px rgba(255,107,43,0.6);">02</div>
+                  <div>
+                    <div style="font-size:38px;font-weight:900;color:#FFFFFF;">验收结果</div>
+                    <div style="font-size:22px;color:#FFE2B8;margin-top:6px;opacity:0.9;">所见即所得，持续对话打磨</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding:22px 26px;border-radius:22px;background:linear-gradient(90deg,rgba(255,107,43,0.28),rgba(255,179,71,0.14));border:1px solid rgba(255,179,71,0.5);display:flex;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(255,107,43,0.2);">
+              <span style="font-size:23px;color:#FFF;font-weight:800;">直奔结果 · 创造力即生产力</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:20px;color:#FFB347;font-weight:800;">100x FASTER</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 镜头 4 (15 - 21s): 卡片收拢化作金色光轨 + 三个动态数据胶囊 -->
+      <section id="shot-4" class="shot-scene">
+        <div id="s4-header" style="text-align:center;margin-bottom:52px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:22px;color:#FFB347;letter-spacing:0.2em;margin-bottom:12px;">
+            QUANTUM LEAP IN DELIVERY
+          </div>
+          <h2 style="font-size:56px;font-weight:900;color:#FFFFFF;letter-spacing:-0.02em;">
+            当代码门槛归零，交付速度彻底重构
+          </h2>
+        </div>
+
+        <div class="s4-capsules-stack">
+          <!-- 胶囊 1: 30秒生成原型 -->
+          <div id="s4-cap-1" class="s4-capsule">
+            <div id="s4-num-1" class="s4-metric-num text-amber-gradient">30s</div>
+            <div class="s4-capsule-copy">
+              <div class="s4-capsule-title">30秒生成原型</div>
+              <div class="s4-capsule-sub">从一句模糊想法，瞬间点亮可交互页面</div>
+            </div>
+            <div class="s4-capsule-icon">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+          </div>
+
+          <!-- 胶囊 2: 0行手动代码 -->
+          <div id="s4-cap-2" class="s4-capsule">
+            <div id="s4-num-2" class="s4-metric-num text-amber-gradient">0行</div>
+            <div class="s4-capsule-copy">
+              <div class="s4-capsule-title">0行手动代码</div>
+              <div class="s4-capsule-sub">全程自然语言驱动，跳过繁琐底层语法</div>
+            </div>
+            <div class="s4-capsule-icon">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+                <line x1="14" y1="4" x2="10" y2="20"></line>
+              </svg>
+            </div>
+          </div>
+
+          <!-- 胶囊 3: 100%自己把关 -->
+          <div id="s4-cap-3" class="s4-capsule">
+            <div id="s4-num-3" class="s4-metric-num text-amber-gradient">100%</div>
+            <div class="s4-capsule-copy">
+              <div class="s4-capsule-title">100%自己把关</div>
+              <div class="s4-capsule-sub">审美、交互与验收标准完全由你掌控</div>
+            </div>
+            <div class="s4-capsule-icon">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="M9 12l2 2 4-4"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 镜头 5 (21 - 26s): 光粒子向中心汇聚 + 大字逐字高亮显现 -->
+      <section id="shot-5" class="shot-scene">
+        <div class="s5-manifesto-wrap">
+          <div id="s5-ring" class="s5-core-ring"></div>
+
+          <div id="s5-badge" style="display:inline-flex;align-items:center;gap:12px;padding:12px 28px;border-radius:999px;background:rgba(255,107,43,0.16);border:1px solid rgba(255,179,71,0.45);color:#FFE2B8;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;letter-spacing:0.15em;margin-bottom:58px;">
+            <span>HUMAN × AGENT COLLABORATION</span>
+          </div>
+
+          <!-- Line 1: 你负责定义方向， -->
+          <div id="s5-line-1" class="s5-line s5-line-1"></div>
+
+          <!-- Line 2: Agent 负责把活干完 -->
+          <div id="s5-line-2" class="s5-line s5-line-2"></div>
+        </div>
+      </section>
+
+      <!-- 镜头 6 (26 - 30s): 极简高级结语卡片 + 底部细腻进度条走满收尾 -->
+      <section id="shot-6" class="shot-scene">
+        <div id="s6-card" class="s6-finale-card">
+          <div id="s6-crest" class="s6-crest">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="url(#amberGrad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+
+          <div class="s6-overline">STEAM VIP RESOURCE LIBRARY</div>
+
+          <h2 class="s6-main-title">蒸汽会员资源库</h2>
+          <div class="s6-sub-title text-amber-gradient">· 第6课演示作品 ·</div>
+
+          <div class="s6-divider"></div>
+
+          <div class="s6-theme-quote">
+            “AI 对话式编程：从一句需求，到一个能验收的结果”
+          </div>
+
+          <div class="s6-progress-wrap">
+            <div class="s6-progress-meta">
+              <span id="s6-status-label">DELIVERING VERIFIED RESULT...</span>
+              <span id="s6-progress-pct" style="color:#FFB347;">0%</span>
+            </div>
+            <div class="s6-progress-track">
+              <div id="s6-progress-fill" class="s6-progress-fill"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Bottom 6-Shot Segmented Master Progress Bar -->
+    <div class="master-footer">
+      <div class="master-footer-info">
+        <span id="footer-shot-caption">01 // 痛点叩问：最大的门槛是什么？</span>
+        <span>1080 × 1920 · 60FPS MOTION POSTER</span>
+      </div>
+      <div class="master-segments">
+        <div class="master-seg"><div id="seg-fill-0" class="master-seg-fill"></div></div>
+        <div class="master-seg"><div id="seg-fill-1" class="master-seg-fill"></div></div>
+        <div class="master-seg"><div id="seg-fill-2" class="master-seg-fill"></div></div>
+        <div class="master-seg"><div id="seg-fill-3" class="master-seg-fill"></div></div>
+        <div class="master-seg"><div id="seg-fill-4" class="master-seg-fill"></div></div>
+        <div class="master-seg"><div id="seg-fill-5" class="master-seg-fill"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      // ============================================================
+      // 1. STAGE VIEWPORT AUTO-FIT (1080 x 1920 -> Any Screen)
+      // ============================================================
+      const STAGE_W = 1080;
+      const STAGE_H = 1920;
+      const TOTAL_DURATION = 30.0; // 30 seconds loop
+
+      const stageWrapper = document.getElementById('stage-wrapper');
+
+      function updateStageScale() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const padding = 20;
+        const scaleX = (vw - padding) / STAGE_W;
+        const scaleY = (vh - padding) / STAGE_H;
+        const scale = Math.min(scaleX, scaleY);
+        stageWrapper.style.transform = `scale(${scale.toFixed(5)})`;
+
+        if (Math.abs(vw / vh - STAGE_W / STAGE_H) < 0.03) {
+          document.body.classList.add('clean-frame');
+        } else {
+          document.body.classList.remove('clean-frame');
+        }
+      }
+
+      window.addEventListener('resize', updateStageScale);
+      updateStageScale();
+
+      // ============================================================
+      // 2. EASING & MATH UTILITIES
+      // ============================================================
+      const clamp = (val, min = 0, max = 1) => Math.max(min, Math.min(max, val));
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const norm = (val, start, end) => clamp((val - start) / (end - start), 0, 1);
+
+      const easeOutExpo = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      const easeOutBack = (t) => {
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+      };
+
+      // ============================================================
+      // 3. BUILD SHOT 5 CHARACTER-BY-CHARACTER DOM NODES
+      // ============================================================
+      const s5Line1El = document.getElementById('s5-line-1');
+      const s5Line2El = document.getElementById('s5-line-2');
+
+      const s5Tokens1 = ['你', '负', '责', '定', '义', '方', '向', '，'];
+      const s5Tokens2 = ['Agent', '负', '责', '把', '活', '干', '完'];
+
+      const s5CharNodes = [];
+
+      s5Tokens1.forEach((ch, idx) => {
+        const span = document.createElement('span');
+        span.className = 's5-char';
+        span.textContent = ch;
+        span.dataset.accent = (idx >= 3 && idx <= 6) ? 'gold' : 'white';
+        s5Line1El.appendChild(span);
+        s5CharNodes.push(span);
+      });
+
+      s5Tokens2.forEach((ch, idx) => {
+        const span = document.createElement('span');
+        span.className = 's5-char' + (ch === 'Agent' ? ' s5-char-agent' : '');
+        span.textContent = ch;
+        span.dataset.accent = (ch === 'Agent' || idx >= 3) ? 'gold' : 'white';
+        s5Line2El.appendChild(span);
+        s5CharNodes.push(span);
+      });
+
+      // ============================================================
+      // 4. CANVAS PARTICLE & GOLDEN LIGHT-TRAIL ENGINE
+      // ============================================================
+      const canvas = document.getElementById('fx-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const PARTICLE_COUNT = 135;
+      const particles = [];
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const isWarm = Math.random() > 0.22;
+        particles.push({
+          id: i,
+          x: Math.random() * STAGE_W,
+          y: Math.random() * STAGE_H,
+          baseX: Math.random() * STAGE_W,
+          baseY: Math.random() * STAGE_H,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: -0.25 - Math.random() * 0.75,
+          radius: 1.4 + Math.random() * 3.4,
+          alpha: 0.2 + Math.random() * 0.65,
+          phase: Math.random() * Math.PI * 2,
+          orbitAngle: (i / PARTICLE_COUNT) * Math.PI * 2,
+          orbitRadius: 90 + Math.random() * 680,
+          isWarm
+        });
+      }
+
+      function renderCanvasFX(t, dt) {
+        ctx.clearRect(0, 0, STAGE_W, STAGE_H);
+
+        // Determine active shot context for specialized Canvas choreography
+        // Shot 1: 0-4s | Shot 2: 4-9s | Shot 3: 9-15s | Shot 4: 15-21s | Shot 5: 21-26s | Shot 6: 26-30s
+
+        // 1) SHOT 3 SPLIT DIVIDER BEAM (9 - 15s)
+        if (t >= 8.8 && t <= 15.4) {
+          const splitAlpha = t < 9.5 ? norm(t, 8.8, 9.5) : (t > 14.8 ? 1 - norm(t, 14.8, 15.4) : 1);
+          ctx.save();
+          const grad = ctx.createLinearGradient(540, 320, 540, 1620);
+          grad.addColorStop(0, 'rgba(255, 107, 43, 0)');
+          grad.addColorStop(0.5, `rgba(255, 179, 71, ${(0.38 * splitAlpha).toFixed(3)})`);
+          grad.addColorStop(1, 'rgba(255, 107, 43, 0)');
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(540, 320);
+          ctx.lineTo(540, 1620);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // 2) SHOT 4 FLOWING GOLDEN LIGHT TRAILS (15 - 21s)
+        if (t >= 14.7 && t <= 21.4) {
+          const trailEnv = t < 15.5
+            ? easeOutCubic(norm(t, 14.7, 15.5))
+            : (t > 20.6 ? 1 - norm(t, 20.6, 21.4) : 1);
+
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+
+          for (let stream = 0; stream < 3; stream++) {
+            const offsetPhase = stream * 2.1 + t * 1.65;
+            const grad = ctx.createLinearGradient(120, 280, 960, 1680);
+            grad.addColorStop(0, `rgba(255, 107, 43, 0)`);
+            grad.addColorStop(0.25, `rgba(255, 107, 43, ${(0.42 * trailEnv).toFixed(3)})`);
+            grad.addColorStop(0.55, `rgba(255, 195, 110, ${(0.68 * trailEnv).toFixed(3)})`);
+            grad.addColorStop(0.85, `rgba(255, 107, 43, ${(0.38 * trailEnv).toFixed(3)})`);
+            grad.addColorStop(1, `rgba(255, 107, 43, 0)`);
+
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = stream === 1 ? 6 : 3.5;
+            ctx.shadowColor = '#FF6B2B';
+            ctx.shadowBlur = 28;
+
+            ctx.beginPath();
+            for (let py = 260; py <= 1680; py += 24) {
+              const progressY = (py - 260) / 1420;
+              const wave = Math.sin(progressY * Math.PI * 3 + offsetPhase) * (160 + stream * 55);
+              const px = 540 + wave;
+              if (py === 260) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        // 3) SHOT 5 CENTRIPETAL CONVERGENCE RAYS (21 - 26s)
+        const vortexStrength = (t >= 20.8 && t <= 26.2)
+          ? (t < 21.6 ? easeOutCubic(norm(t, 20.8, 21.6)) : (t > 25.4 ? 1 - norm(t, 25.4, 26.2) : 1))
+          : 0;
+
+        if (vortexStrength > 0.01) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          const centerGrad = ctx.createRadialGradient(540, 960, 10, 540, 960, 460);
+          centerGrad.addColorStop(0, `rgba(255, 196, 120, ${(0.28 * vortexStrength).toFixed(3)})`);
+          centerGrad.addColorStop(0.45, `rgba(255, 107, 43, ${(0.12 * vortexStrength).toFixed(3)})`);
+          centerGrad.addColorStop(1, 'rgba(255, 107, 43, 0)');
+          ctx.fillStyle = centerGrad;
+          ctx.beginPath();
+          ctx.arc(540, 960, 460, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 4) UPDATE & RENDER PARTICLES DETERMINISTICALLY
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const p = particles[i];
+          const shimmer = 0.55 + 0.45 * Math.sin(t * 2.8 + p.phase);
+
+          let drawX = (p.baseX + Math.sin(t * 0.7 + p.phase) * 42 + t * p.vx * 30) % STAGE_W;
+          if (drawX < 0) drawX += STAGE_W;
+          let drawY = (p.baseY + t * p.vy * 48) % STAGE_H;
+          if (drawY < 0) drawY += STAGE_H;
+
+          // In Shot 4 (15-21s): pull particles along the golden S-curve stream
+          if (t >= 15.0 && t < 21.0) {
+            const s4Blend = Math.sin(norm(t, 15.0, 21.0) * Math.PI);
+            const streamY = ((p.baseY + t * 220) % 1400) + 260;
+            const streamX = 540 + Math.sin(((streamY - 260) / 1400) * Math.PI * 3 + t * 1.65 + (i % 3)) * 210;
+            drawX = lerp(drawX, streamX + Math.cos(p.phase) * 45, s4Blend * 0.72);
+            drawY = lerp(drawY, streamY, s4Blend * 0.72);
+          }
+
+          // In Shot 5 (21-26s): spiral particles inward toward center (540, 960)
+          if (vortexStrength > 0.01) {
+            const cycle = ((t * 0.65 + p.phase / (Math.PI * 2)) % 1);
+            const r = (1 - cycle) * p.orbitRadius;
+            const angle = p.orbitAngle + t * 1.85 + (1 - cycle) * 2.6;
+            const vx = 540 + Math.cos(angle) * r;
+            const vy = 960 + Math.sin(angle) * r * 0.85;
+
+            drawX = lerp(drawX, vx, vortexStrength);
+            drawY = lerp(drawY, vy, vortexStrength);
+
+            // Draw subtle inward light streak in Shot 5
+            if (vortexStrength > 0.3 && i % 2 === 0) {
+              const tailAngle = angle - 0.12;
+              const tailR = r + 28;
+              const tx = 540 + Math.cos(tailAngle) * tailR;
+              const ty = 960 + Math.sin(tailAngle) * tailR * 0.85;
+              ctx.strokeStyle = p.isWarm
+                ? `rgba(255, 179, 71, ${(0.32 * vortexStrength * shimmer).toFixed(3)})`
+                : `rgba(148, 197, 255, ${(0.22 * vortexStrength * shimmer).toFixed(3)})`;
+              ctx.lineWidth = 1.8;
+              ctx.beginPath();
+              ctx.moveTo(tx, ty);
+              ctx.lineTo(drawX, drawY);
+              ctx.stroke();
+            }
+          }
+
+          // In Shot 3 (9-15s): dim left-side particles, boost right-side warm particles
+          let alphaMod = 1;
+          if (t >= 9.0 && t < 15.0) {
+            alphaMod = drawX < 540 ? 0.35 : 1.35;
+          }
+
+          const finalAlpha = clamp(p.alpha * shimmer * alphaMod, 0.05, 0.95);
+          const color = p.isWarm
+            ? `rgba(255, 168, 88, ${finalAlpha.toFixed(3)})`
+            : `rgba(186, 214, 255, ${(finalAlpha * 0.7).toFixed(3)})`;
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(drawX, drawY, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (p.radius > 3.1 && p.isWarm) {
+            ctx.fillStyle = `rgba(255, 107, 43, ${(finalAlpha * 0.24).toFixed(3)})`;
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, p.radius * 3.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        ctx.restore();
+      }
+
+      // ============================================================
+      // 5. DOM REFERENCES FOR ALL 6 SHOTS
+      // ============================================================
+      const auraEl = document.getElementById('breathing-aura');
+      const secAuraEl = document.getElementById('secondary-aura');
+
+      const shotEls = [
+        document.getElementById('shot-1'),
+        document.getElementById('shot-2'),
+        document.getElementById('shot-3'),
+        document.getElementById('shot-4'),
+        document.getElementById('shot-5'),
+        document.getElementById('shot-6')
+      ];
+
+      // Shot 1 refs
+      const s1Kicker = document.getElementById('s1-kicker');
+      const s1Line1 = document.getElementById('s1-line-1');
+      const s1Line2 = document.getElementById('s1-line-2');
+      const s1Underline = document.getElementById('s1-underline');
+
+      // Shot 2 refs
+      const s2IconWrap = document.getElementById('s2-icon-wrap');
+      const s2Ripple1 = document.getElementById('s2-ripple-1');
+      const s2Ripple2 = document.getElementById('s2-ripple-2');
+      const s2PromptBox = document.getElementById('s2-prompt-box');
+      const s2Typed1 = document.getElementById('s2-typed-1');
+      const s2Typed2Prefix = document.getElementById('s2-typed-2-prefix');
+      const s2Typed2Highlight = document.getElementById('s2-typed-2-highlight');
+      const s2Cursor1 = document.getElementById('s2-cursor-1');
+      const s2Cursor2 = document.getElementById('s2-cursor-2');
+
+      const S2_STR_1 = '不是不会写代码，';
+      const S2_STR_2A = '而是不敢开始';
+      const S2_STR_2B = '第一句对话';
+
+      // Shot 3 refs
+      const s3Header = document.getElementById('s3-header');
+      const s3LeftCard = document.getElementById('s3-left-card');
+      const s3RightCard = document.getElementById('s3-right-card');
+      const s3LSteps = [
+        document.getElementById('s3-l-step1'),
+        document.getElementById('s3-l-step2'),
+        document.getElementById('s3-l-step3')
+      ];
+      const s3RSteps = [
+        document.getElementById('s3-r-step1'),
+        document.getElementById('s3-r-step2')
+      ];
+
+      // Shot 4 refs
+      const s4Header = document.getElementById('s4-header');
+      const s4Cap1 = document.getElementById('s4-cap-1');
+      const s4Cap2 = document.getElementById('s4-cap-2');
+      const s4Cap3 = document.getElementById('s4-cap-3');
+      const s4Num1 = document.getElementById('s4-num-1');
+      const s4Num2 = document.getElementById('s4-num-2');
+      const s4Num3 = document.getElementById('s4-num-3');
+
+      // Shot 5 refs
+      const s5Ring = document.getElementById('s5-ring');
+      const s5Badge = document.getElementById('s5-badge');
+
+      // Shot 6 refs
+      const s6Card = document.getElementById('s6-card');
+      const s6Crest = document.getElementById('s6-crest');
+      const s6ProgressFill = document.getElementById('s6-progress-fill');
+      const s6ProgressPct = document.getElementById('s6-progress-pct');
+      const s6StatusLabel = document.getElementById('s6-status-label');
+
+      // HUD & Telemetry refs
+      const shotTagIndicator = document.getElementById('shot-tag-indicator');
+      const footerShotCaption = document.getElementById('footer-shot-caption');
+      const hudTimecode = document.getElementById('hud-timecode');
+      const shotDotBtns = document.querySelectorAll('.shot-dot');
+      const segFills = [
+        document.getElementById('seg-fill-0'),
+        document.getElementById('seg-fill-1'),
+        document.getElementById('seg-fill-2'),
+        document.getElementById('seg-fill-3'),
+        document.getElementById('seg-fill-4'),
+        document.getElementById('seg-fill-5')
+      ];
+
+      const SHOT_WINDOWS = [
+        { start: 0, end: 4, caption: '01 // 痛点叩问：普通人做软件，最大的门槛是什么？' },
+        { start: 4, end: 9, caption: '02 // 破局觉醒：不是不会写代码，而是不敢开始第一句对话' },
+        { start: 9, end: 15, caption: '03 // 范式对比：传统方式 vs AI 对话式编程' },
+        { start: 15, end: 21, caption: '04 // 效率跃迁：30秒生成原型 · 0行手动代码 · 100%把关' },
+        { start: 21, end: 26, caption: '05 // 协同宣言：你负责定义方向，Agent 负责把活干完' },
+        { start: 26, end: 30, caption: '06 // 结语定格：蒸汽会员资源库 · 第6课演示作品' }
+      ];
+
+      // ============================================================
+      // 6. MASTER 30-SECOND TIMELINE CHOREOGRAPHY RENDERER
+      // ============================================================
+      function updateSceneAtTime(t) {
+        // 1. Breathing Aura Choreography across all 30s
+        const breathScale = 1 + 0.16 * Math.sin(t * 1.55);
+        const breathOpacity = 0.72 + 0.25 * Math.sin(t * 1.55 + 0.5);
+        let auraX = 0;
+        let auraY = 0;
+
+        if (t >= 9 && t < 15) {
+          // Shift warm aura toward the right AI card during Shot 3
+          const s3Mix = Math.sin(norm(t, 9, 15) * Math.PI);
+          auraX = 210 * s3Mix;
+        } else if (t >= 21 && t < 26) {
+          // Intensify center core during Shot 5
+          auraY = -20;
+        }
+
+        auraEl.style.transform = `translate3d(${auraX.toFixed(1)}px, ${auraY.toFixed(1)}px, 0) scale(${breathScale.toFixed(4)})`;
+        auraEl.style.opacity = breathOpacity.toFixed(3);
+        secAuraEl.style.transform = `scale(${(1.12 - 0.1 * Math.sin(t * 1.1)).toFixed(4)})`;
+
+        // 2. Determine Active Shot Index (0..5)
+        let activeShot = 0;
+        for (let i = 0; i < SHOT_WINDOWS.length; i++) {
+          if (t >= SHOT_WINDOWS[i].start && t < SHOT_WINDOWS[i].end) {
+            activeShot = i;
+            break;
+          }
+        }
+        if (t >= 30) activeShot = 5;
+
+        // Update Top & Bottom Telemetry + HUD Dots
+        shotTagIndicator.textContent = `SCENE 0${activeShot + 1} / 06`;
+        footerShotCaption.textContent = SHOT_WINDOWS[activeShot].caption;
+        hudTimecode.textContent = `${t.toFixed(1).padStart(4, '0')}s / 30.0s`;
+
+        shotDotBtns.forEach((btn, idx) => {
+          btn.classList.toggle('active', idx === activeShot);
+        });
+
+        SHOT_WINDOWS.forEach((win, idx) => {
+          const p = clamp((t - win.start) / (win.end - win.start), 0, 1);
+          segFills[idx].style.width = `${(p * 100).toFixed(1)}%`;
+        });
+
+        // Reset visibility first
+        shotEls.forEach((el) => {
+          el.classList.remove('is-visible');
+          el.style.opacity = '0';
+          el.style.transform = 'translate3d(0,0,0)';
+        });
+
+        // =================================-------------------------
+        // SHOT 1 (0.0s - 4.0s): 深邃午夜蓝 + 呼吸橙光 + 弹性浮现大字
+        // =================================-------------------------
+        if (t >= 0 && t < 4.25) {
+          shotEls[0].classList.add('is-visible');
+          const exitT = norm(t, 3.45, 4.1);
+          const sceneOpacity = exitT > 0 ? 1 - easeInOutCubic(exitT) : norm(t, 0, 0.35);
+          const sceneY = exitT > 0 ? -95 * easeInOutCubic(exitT) : 0;
+          const sceneBlur = exitT > 0 ? 14 * exitT : 0;
+
+          shotEls[0].style.opacity = sceneOpacity.toFixed(3);
+          shotEls[0].style.transform = `translate3d(0, ${sceneY.toFixed(1)}px, 0)`;
+          shotEls[0].style.filter = sceneBlur > 0.2 ? `blur(${sceneBlur.toFixed(1)}px)` : 'none';
+
+          // Kicker badge entrance
+          const kP = easeOutBack(norm(t, 0.15, 0.9));
+          s1Kicker.style.opacity = clamp(norm(t, 0.15, 0.6)).toFixed(3);
+          s1Kicker.style.transform = `translate3d(0, ${((1 - kP) * 36).toFixed(1)}px, 0) scale(${(0.88 + 0.12 * kP).toFixed(3)})`;
+
+          // Line 1 elastic entrance: “普通人做软件，”
+          const l1P = easeOutBack(norm(t, 0.35, 1.25));
+          const l1Blur = (1 - norm(t, 0.35, 0.95)) * 16;
+          s1Line1.style.opacity = clamp(norm(t, 0.35, 0.85)).toFixed(3);
+          s1Line1.style.transform = `translate3d(0, ${((1 - l1P) * 56).toFixed(1)}px, 0) scale(${(0.9 + 0.1 * l1P).toFixed(3)})`;
+          s1Line1.style.filter = l1Blur > 0.2 ? `blur(${l1Blur.toFixed(1)}px)` : 'none';
+
+          // Line 2 elastic entrance: “最大的门槛是什么？”
+          const l2P = easeOutBack(norm(t, 0.85, 1.8));
+          const l2Blur = (1 - norm(t, 0.85, 1.45)) * 18;
+          s1Line2.style.opacity = clamp(norm(t, 0.85, 1.35)).toFixed(3);
+          s1Line2.style.transform = `translate3d(0, ${((1 - l2P) * 64).toFixed(1)}px, 0) scale(${(0.88 + 0.12 * l2P).toFixed(3)})`;
+          s1Line2.style.filter = l2Blur > 0.2 ? `blur(${l2Blur.toFixed(1)}px)` : 'none';
+
+          // Glowing underline sweep
+          const uP = easeOutExpo(norm(t, 1.45, 2.35));
+          s1Underline.style.transform = `scaleX(${uP.toFixed(3)})`;
+        }
+
+        // =================================-------------------------
+        // SHOT 2 (4.0s - 9.0s): 发光对话框图标 + 打字机打出文字
+        // =================================-------------------------
+        if (t >= 3.85 && t < 9.2) {
+          shotEls[1].classList.add('is-visible');
+          const enterT = easeOutExpo(norm(t, 3.9, 4.5));
+          const exitT = norm(t, 8.45, 9.05);
+          const sceneOpacity = exitT > 0 ? 1 - easeInOutCubic(exitT) : enterT;
+          const sceneScale = exitT > 0 ? 1 - 0.06 * exitT : 0.94 + 0.06 * enterT;
+
+          shotEls[1].style.opacity = sceneOpacity.toFixed(3);
+          shotEls[1].style.transform = `scale(${sceneScale.toFixed(4)})`;
+
+          // Glowing Dialog Icon spring pop
+          const iconP = easeOutBack(norm(t, 4.0, 4.75));
+          const iconFloat = Math.sin(t * 2.6) * 8;
+          s2IconWrap.style.transform = `translate3d(0, ${((1 - iconP) * 50 + iconFloat).toFixed(1)}px, 0) scale(${clamp(iconP, 0, 1.15).toFixed(3)})`;
+
+          // Concentric sonar ripples
+          const r1 = (t * 0.65) % 1;
+          const r2 = ((t * 0.65) + 0.5) % 1;
+          s2Ripple1.style.transform = `scale(${(1 + r1 * 0.65).toFixed(3)})`;
+          s2Ripple1.style.opacity = ((1 - r1) * 0.65).toFixed(3);
+          s2Ripple2.style.transform = `scale(${(1 + r2 * 0.65).toFixed(3)})`;
+          s2Ripple2.style.opacity = ((1 - r2) * 0.65).toFixed(3);
+
+          // Prompt Box entrance
+          const boxP = easeOutExpo(norm(t, 4.2, 4.95));
+          s2PromptBox.style.transform = `translate3d(0, ${((1 - boxP) * 55).toFixed(1)}px, 0)`;
+          s2PromptBox.style.opacity = boxP.toFixed(3);
+
+          // Typewriter Line 1 (4.65s -> 6.15s): “不是不会写代码，”
+          const type1P = norm(t, 4.65, 6.15);
+          const charCount1 = Math.floor(type1P * S2_STR_1.length);
+          s2Typed1.textContent = S2_STR_1.slice(0, charCount1);
+
+          // Typewriter Line 2 (6.35s -> 8.15s): “而是不敢开始第一句对话”
+          const totalLine2Len = S2_STR_2A.length + S2_STR_2B.length;
+          const type2P = norm(t, 6.35, 8.15);
+          const charCount2 = Math.floor(type2P * totalLine2Len);
+
+          if (charCount2 <= S2_STR_2A.length) {
+            s2Typed2Prefix.textContent = S2_STR_2A.slice(0, charCount2);
+            s2Typed2Highlight.textContent = '';
+          } else {
+            s2Typed2Prefix.textContent = S2_STR_2A;
+            s2Typed2Highlight.textContent = S2_STR_2B.slice(0, charCount2 - S2_STR_2A.length);
+          }
+
+          if (t < 6.3) {
+            s2Cursor1.style.display = 'inline-block';
+            s2Cursor2.style.display = 'none';
+          } else {
+            s2Cursor1.style.display = 'none';
+            s2Cursor2.style.display = 'inline-block';
+          }
+        }
+
+        // =================================-------------------------
+        // SHOT 3 (9.0s - 15.0s): 一分为二 · 传统方式 vs 对话式编程
+        // =================================-------------------------
+        if (t >= 8.85 && t < 15.3) {
+          shotEls[2].classList.add('is-visible');
+
+          // At 14.4s - 15.1s: Cards converge inward to center to form Golden Light Trails!
+          const foldT = easeInOutCubic(norm(t, 14.35, 15.1));
+          const enterT = easeOutExpo(norm(t, 8.95, 9.6));
+          const sceneOpacity = foldT > 0 ? 1 - foldT : enterT;
+
+          shotEls[2].style.opacity = sceneOpacity.toFixed(3);
+
+          // Header
+          s3Header.style.transform = `translate3d(0, ${((1 - enterT) * -40).toFixed(1)}px, 0)`;
+
+          // Left Card (Legacy) slides in from left, folds right at end of shot
+          const leftIn = easeOutExpo(norm(t, 9.05, 9.85));
+          const leftX = (1 - leftIn) * -140 + foldT * 240;
+          const leftScale = (0.92 + 0.08 * leftIn) * (1 - foldT * 0.35);
+          s3LeftCard.style.transform = `translate3d(${leftX.toFixed(1)}px, 0, 0) scale(${leftScale.toFixed(3)})`;
+          s3LeftCard.style.filter = foldT > 0.05 ? `blur(${(foldT * 16).toFixed(1)}px)` : 'none';
+
+          // Right Card (AI Conversational) slides in from right with warm authority, folds left at end
+          const rightIn = easeOutBack(norm(t, 9.35, 10.25));
+          const rightX = (1 - rightIn) * 140 - foldT * 240;
+          const rightScale = (0.92 + 0.08 * rightIn) * (1 - foldT * 0.35);
+          s3RightCard.style.transform = `translate3d(${rightX.toFixed(1)}px, -10px, 0) scale(${rightScale.toFixed(3)})`;
+          s3RightCard.style.filter = foldT > 0.05 ? `blur(${(foldT * 16).toFixed(1)}px)` : 'none';
+
+          // Staggered Step Nodes on Left Card
+          s3LSteps.forEach((stepEl, idx) => {
+            const sp = easeOutExpo(norm(t, 9.5 + idx * 0.38, 10.15 + idx * 0.38));
+            stepEl.style.opacity = sp.toFixed(3);
+            stepEl.style.transform = `translate3d(0, ${((1 - sp) * 28).toFixed(1)}px, 0)`;
+          });
+
+          // Staggered Step Nodes on Right Card
+          s3RSteps.forEach((stepEl, idx) => {
+            const sp = easeOutBack(norm(t, 10.2 + idx * 0.55, 11.0 + idx * 0.55));
+            stepEl.style.opacity = clamp(sp, 0, 1).toFixed(3);
+            stepEl.style.transform = `translate3d(0, ${((1 - sp) * 34).toFixed(1)}px, 0) scale(${(0.92 + 0.08 * sp).toFixed(3)})`;
+          });
+        }
+
+        // =================================-------------------------
+        // SHOT 4 (15.0s - 21.0s): 金色光轨 + 三个动态数据胶囊依次跳出
+        // =================================-------------------------
+        if (t >= 14.85 && t < 21.25) {
+          shotEls[3].classList.add('is-visible');
+          const enterT = easeOutExpo(norm(t, 14.95, 15.6));
+          const exitT = easeInOutCubic(norm(t, 20.4, 21.05));
+          const sceneOpacity = exitT > 0 ? 1 - exitT : enterT;
+
+          shotEls[3].style.opacity = sceneOpacity.toFixed(3);
+          shotEls[3].style.transform = exitT > 0
+            ? `scale(${(1 - exitT * 0.12).toFixed(3)})`
+            : 'scale(1)';
+
+          s4Header.style.opacity = enterT.toFixed(3);
+          s4Header.style.transform = `translate3d(0, ${((1 - enterT) * -32).toFixed(1)}px, 0)`;
+
+          // Capsule 1 (15.35s): “30秒生成原型”
+          const c1P = easeOutBack(norm(t, 15.35, 16.25));
+          const c1Count = Math.round(easeOutExpo(norm(t, 15.4, 16.45)) * 30);
+          s4Num1.textContent = `${c1Count}秒`;
+          s4Cap1.style.opacity = clamp(norm(t, 15.35, 15.8)).toFixed(3);
+          s4Cap1.style.transform = `translate3d(0, ${((1 - c1P) * 70).toFixed(1)}px, 0) scale(${(0.86 + 0.14 * c1P).toFixed(3)})`;
+
+          // Capsule 2 (16.65s): “0行手动代码” (rolls down from 99 -> 0 for impact)
+          const c2P = easeOutBack(norm(t, 16.65, 17.55));
+          const c2Raw = 1 - easeOutExpo(norm(t, 16.7, 17.65));
+          const c2Count = Math.round(c2Raw * 99);
+          s4Num2.textContent = `${c2Count}行`;
+          s4Cap2.style.opacity = clamp(norm(t, 16.65, 17.1)).toFixed(3);
+          s4Cap2.style.transform = `translate3d(0, ${((1 - c2P) * 70).toFixed(1)}px, 0) scale(${(0.86 + 0.14 * c2P).toFixed(3)})`;
+
+          // Capsule 3 (17.95s): “100%自己把关”
+          const c3P = easeOutBack(norm(t, 17.95, 18.85));
+          const c3Count = Math.round(easeOutExpo(norm(t, 18.0, 19.05)) * 100);
+          s4Num3.textContent = `${c3Count}%`;
+          s4Cap3.style.opacity = clamp(norm(t, 17.95, 18.4)).toFixed(3);
+          s4Cap3.style.transform = `translate3d(0, ${((1 - c3P) * 70).toFixed(1)}px, 0) scale(${(0.86 + 0.14 * c3P).toFixed(3)})`;
+        }
+
+        // =================================-------------------------
+        // SHOT 5 (21.0s - 26.0s): 光粒子向中心汇聚 + 大字逐字高亮显现
+        // =================================-------------------------
+        if (t >= 20.85 && t < 26.25) {
+          shotEls[4].classList.add('is-visible');
+          const enterT = easeOutExpo(norm(t, 20.95, 21.5));
+          const exitT = easeInOutCubic(norm(t, 25.45, 26.05));
+          const sceneOpacity = exitT > 0 ? 1 - exitT : enterT;
+
+          shotEls[4].style.opacity = sceneOpacity.toFixed(3);
+          shotEls[4].style.transform = exitT > 0
+            ? `translate3d(0, ${(-45 * exitT).toFixed(1)}px, 0) scale(${(1 - 0.05 * exitT).toFixed(3)})`
+            : 'translate3d(0,0,0)';
+
+          // Core ring pulse
+          const ringScale = 0.82 + 0.22 * easeOutExpo(norm(t, 21.0, 24.8));
+          s5Ring.style.transform = `scale(${ringScale.toFixed(3)})`;
+          s5Ring.style.opacity = (0.35 + 0.35 * Math.sin(t * 3)).toFixed(3);
+
+          s5Badge.style.opacity = enterT.toFixed(3);
+          s5Badge.style.transform = `translate3d(0, ${((1 - enterT) * 28).toFixed(1)}px, 0)`;
+
+          // Character-by-character sequential illumination (21.3s -> 24.5s)
+          const totalChars = s5CharNodes.length;
+          s5CharNodes.forEach((charNode, idx) => {
+            const charStart = 21.25 + idx * 0.19;
+            const charEnd = charStart + 0.52;
+            const cp = easeOutBack(norm(t, charStart, charEnd));
+            const lit = clamp(norm(t, charStart, charStart + 0.38), 0, 1);
+
+            const yOffset = (1 - cp) * 32;
+            const scale = 0.84 + 0.16 * cp;
+            const alpha = 0.14 + 0.86 * lit;
+
+            charNode.style.opacity = alpha.toFixed(3);
+            charNode.style.transform = `translate3d(0, ${yOffset.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
+
+            if (lit > 0.65) {
+              if (charNode.dataset.accent === 'gold') {
+                charNode.style.color = '#FFB347';
+                charNode.style.textShadow = '0 0 38px rgba(255, 107, 43, 0.85), 0 0 14px rgba(255, 226, 184, 0.6)';
+              } else {
+                charNode.style.color = '#FFFFFF';
+                charNode.style.textShadow = '0 0 28px rgba(255, 255, 255, 0.45)';
+              }
+            } else {
+              charNode.style.color = '#475569';
+              charNode.style.textShadow = 'none';
+            }
+          });
+        }
+
+        // =================================-------------------------
+        // SHOT 6 (26.0s - 30.0s): 极简高级结语卡片 + 底部细腻进度条走满收尾
+        // =================================-------------------------
+        if (t >= 25.85 && t <= 30.0) {
+          shotEls[5].classList.add('is-visible');
+          const enterT = easeOutExpo(norm(t, 25.95, 26.85));
+          const cardSpring = easeOutBack(norm(t, 25.95, 26.9));
+
+          shotEls[5].style.opacity = enterT.toFixed(3);
+          s6Card.style.transform = `translate3d(0, ${((1 - cardSpring) * 54).toFixed(1)}px, 0) scale(${(0.92 + 0.08 * cardSpring).toFixed(3)})`;
+
+          const crestFloat = Math.sin(t * 2.4) * 6;
+          s6Crest.style.transform = `translate3d(0, ${crestFloat.toFixed(1)}px, 0)`;
+
+          // Delicate bottom progress bar fills smoothly from 0% to 100% (26.35s -> 29.65s)
+          const progP = easeInOutCubic(norm(t, 26.35, 29.65));
+          const pct = Math.round(progP * 100);
+          s6ProgressFill.style.width = `${(progP * 100).toFixed(2)}%`;
+          s6ProgressPct.textContent = `${pct}%`;
+
+          if (pct >= 100) {
+            s6StatusLabel.textContent = 'VERIFIED & READY · 验收完成';
+            s6StatusLabel.style.color = '#FFE2B8';
+          } else {
+            s6StatusLabel.textContent = 'DELIVERING VERIFIED RESULT...';
+            s6StatusLabel.style.color = '#94A3B8';
+          }
+        }
+      }
+
+      // ============================================================
+      // 7. MASTER PLAYBACK LOOP & INTERACTIVE CONTROLS
+      // ============================================================
+      let isPlaying = true;
+      let elapsedTime = 0.0;
+      let lastFrameTime = performance.now();
+
+      const btnTogglePlay = document.getElementById('btn-toggle-play');
+      const iconPlayState = document.getElementById('icon-play-state');
+      const labelPlayState = document.getElementById('label-play-state');
+      const btnRestart = document.getElementById('btn-restart');
+
+      function updatePlayButtonUI() {
+        if (isPlaying) {
+          labelPlayState.textContent = '暂停';
+          iconPlayState.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4.5" height="16" rx="1.5"></rect>
+              <rect x="13.5" y="4" width="4.5" height="16" rx="1.5"></rect>
+            </svg>`;
+        } else {
+          labelPlayState.textContent = '播放';
+          iconPlayState.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="6 4 20 12 6 20 6 4"></polygon>
+            </svg>`;
+        }
+      }
+
+      function togglePlay() {
+        isPlaying = !isPlaying;
+        lastFrameTime = performance.now();
+        updatePlayButtonUI();
+      }
+
+      function restartPoster() {
+        elapsedTime = 0.0;
+        isPlaying = true;
+        lastFrameTime = performance.now();
+        updatePlayButtonUI();
+        updateSceneAtTime(0);
+        renderCanvasFX(0, 0.016);
+      }
+
+      btnTogglePlay.addEventListener('click', togglePlay);
+      btnRestart.addEventListener('click', restartPoster);
+
+      shotDotBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const shotIdx = parseInt(btn.dataset.shot, 10);
+          if (SHOT_WINDOWS[shotIdx]) {
+            elapsedTime = SHOT_WINDOWS[shotIdx].start + 0.01;
+            lastFrameTime = performance.now();
+            updateSceneAtTime(elapsedTime);
+            renderCanvasFX(elapsedTime, 0.016);
+          }
+        });
+      });
+
+      // Keyboard shortcuts for preview inspection
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          togglePlay();
+        } else if (e.key === 'r' || e.key === 'R') {
+          restartPoster();
+        } else if (e.key >= '1' && e.key <= '6') {
+          const idx = parseInt(e.key, 10) - 1;
+          elapsedTime = SHOT_WINDOWS[idx].start + 0.01;
+          lastFrameTime = performance.now();
+          updateSceneAtTime(elapsedTime);
+          renderCanvasFX(elapsedTime, 0.016);
+        } else if (e.key === 'h' || e.key === 'H') {
+          document.body.classList.toggle('hud-hidden');
+        }
+      });
+
+      function tick(now) {
+        const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+        lastFrameTime = now;
+
+        if (isPlaying) {
+          elapsedTime += dt;
+          if (elapsedTime >= TOTAL_DURATION) {
+            elapsedTime = elapsedTime % TOTAL_DURATION;
+          }
+        }
+
+        updateSceneAtTime(elapsedTime);
+        renderCanvasFX(elapsedTime, dt);
+
+        requestAnimationFrame(tick);
+      }
+
+      // Initial render and start loop
+      updateSceneAtTime(0);
+      renderCanvasFX(0, 0.016);
+      requestAnimationFrame(tick);
+
+      // ============================================================
+      // 8. BUILT-IN 1080x1920 60FPS VIDEO EXPORTER (.MP4 / .WEBM)
+      // ============================================================
+      // Renders a synchronized 1080x1920 composite Canvas stream so the user
+      // can directly export a self-contained vertical video file with one click.
+      const btnExportVideo = document.getElementById('btn-export-video');
+      const labelExport = document.getElementById('label-export');
+      const exportOverlayBadge = document.getElementById('export-overlay-badge');
+      const exportStatusText = document.getElementById('export-status-text');
+
+      let isExporting = false;
+      let activeRecorder = null;
+
+      function drawRoundedRect(c, x, y, w, h, r) {
+        c.beginPath();
+        c.moveTo(x + r, y);
+        c.lineTo(x + w - r, y);
+        c.quadraticCurveTo(x + w, y, x + w, y + r);
+        c.lineTo(x + w, y + h - r);
+        c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        c.lineTo(x + r, y + h);
+        c.quadraticCurveTo(x, y + h, x, y + h - r);
+        c.lineTo(x, y + r);
+        c.quadraticCurveTo(x, y, x + r, y);
+        c.closePath();
+      }
+
+      function renderCompositeExportFrame(ec, t) {
+        // 1. Deep Midnight Gradient Background
+        const bgGrad = ec.createLinearGradient(0, 0, 0, STAGE_H);
+        bgGrad.addColorStop(0, '#05070D');
+        bgGrad.addColorStop(0.5, '#091022');
+        bgGrad.addColorStop(1, '#0F172A');
+        ec.fillStyle = bgGrad;
+        ec.fillRect(0, 0, STAGE_W, STAGE_H);
+
+        // 2. Breathing Warm Orange Aura
+        const breathScale = 1 + 0.16 * Math.sin(t * 1.55);
+        const auraR = 460 * breathScale;
+        let auraX = 540;
+        if (t >= 9 && t < 15) auraX += 200 * Math.sin(norm(t, 9, 15) * Math.PI);
+        const auraGrad = ec.createRadialGradient(auraX, 960, 10, auraX, 960, auraR);
+        auraGrad.addColorStop(0, 'rgba(255, 107, 43, 0.34)');
+        auraGrad.addColorStop(0.45, 'rgba(255, 179, 71, 0.14)');
+        auraGrad.addColorStop(1, 'rgba(255, 107, 43, 0)');
+        ec.fillStyle = auraGrad;
+        ec.fillRect(0, 0, STAGE_W, STAGE_H);
+
+        // 3. Composite the live Particle & Light-Trail Canvas
+        ec.drawImage(canvas, 0, 0);
+
+        // 4. Render Shot Typography & Cards onto the 1080x1920 Export Frame
+        ec.save();
+        ec.textAlign = 'center';
+        ec.textBaseline = 'middle';
+
+        // Header telemetry
+        ec.font = '600 20px "JetBrains Mono", monospace';
+        ec.fillStyle = 'rgba(203, 213, 225, 0.65)';
+        ec.textAlign = 'left';
+        ec.fillText('● AI CONVERSATIONAL CODING', 96, 160);
+        ec.textAlign = 'right';
+        const shotNum = Math.min(6, Math.floor(t / 5) + 1);
+        ec.fillText(`0${shotNum} / 06`, 984, 160);
+        ec.textAlign = 'center';
+
+        // SHOT 1 (0 - 4s)
+        if (t < 4.0) {
+          const exitT = norm(t, 3.45, 4.0);
+          const alpha = exitT > 0 ? 1 - exitT : norm(t, 0, 0.45);
+          const yShift = exitT > 0 ? -80 * exitT : (1 - easeOutBack(norm(t, 0.2, 1.2))) * 50;
+          ec.globalAlpha = clamp(alpha, 0, 1);
+
+          ec.font = '700 26px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFB347';
+          ec.fillText('✦ AI 对话式编程 · 认知破局', 540, 800 + yShift);
+
+          ec.font = '900 76px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#F8FAFC';
+          ec.fillText('普通人做软件，', 540, 930 + yShift);
+
+          ec.fillStyle = '#FFB347';
+          ec.fillText('最大的门槛是什么？', 540, 1045 + yShift);
+        }
+
+        // SHOT 2 (4 - 9s)
+        if (t >= 4.0 && t < 9.0) {
+          const alpha = t > 8.45 ? 1 - norm(t, 8.45, 9.0) : norm(t, 4.0, 4.5);
+          ec.globalAlpha = clamp(alpha, 0, 1);
+
+          // Glowing dialog icon box
+          drawRoundedRect(ec, 466, 630, 148, 148, 38);
+          ec.fillStyle = 'rgba(255, 107, 43, 0.25)';
+          ec.fill();
+          ec.lineWidth = 3;
+          ec.strokeStyle = '#FFB347';
+          ec.stroke();
+
+          // Prompt card
+          drawRoundedRect(ec, 84, 835, 912, 370, 40);
+          ec.fillStyle = 'rgba(13, 19, 35, 0.9)';
+          ec.fill();
+          ec.lineWidth = 2;
+          ec.strokeStyle = 'rgba(255, 179, 71, 0.45)';
+          ec.stroke();
+
+          const c1 = Math.floor(norm(t, 4.65, 6.15) * S2_STR_1.length);
+          const s2Full = S2_STR_2A + S2_STR_2B;
+          const c2 = Math.floor(norm(t, 6.35, 8.15) * s2Full.length);
+
+          ec.font = '700 50px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#94A3B8';
+          ec.fillText(S2_STR_1.slice(0, c1), 540, 975);
+
+          ec.font = '900 56px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFB347';
+          ec.fillText(s2Full.slice(0, c2), 540, 1085);
+        }
+
+        // SHOT 3 (9 - 15s)
+        if (t >= 9.0 && t < 15.0) {
+          const foldT = easeInOutCubic(norm(t, 14.35, 15.0));
+          ec.globalAlpha = clamp(foldT > 0 ? 1 - foldT : norm(t, 9.0, 9.5), 0, 1);
+
+          ec.font = '900 54px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#F8FAFC';
+          ec.fillText('从“迁就机器语法”到“直达业务结果”', 540, 440);
+
+          // Left Card
+          const lx = 72 + foldT * 220;
+          drawRoundedRect(ec, lx, 540, 450, 860, 36);
+          ec.fillStyle = 'rgba(15, 22, 38, 0.88)';
+          ec.fill();
+          ec.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+          ec.lineWidth = 2;
+          ec.stroke();
+
+          ec.font = '900 46px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#94A3B8';
+          ec.fillText('传统方式', lx + 225, 650);
+          ec.font = '700 36px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#CBD5E1';
+          ec.fillText('01  学语法', lx + 225, 810);
+          ec.fillText('02  写代码', lx + 225, 980);
+          ec.fillStyle = '#F87171';
+          ec.fillText('03  改报错', lx + 225, 1150);
+
+          // Right Card
+          const rx = 558 - foldT * 220;
+          drawRoundedRect(ec, rx, 530, 450, 860, 36);
+          ec.fillStyle = 'rgba(40, 26, 24, 0.9)';
+          ec.fill();
+          ec.strokeStyle = '#FFB347';
+          ec.lineWidth = 3;
+          ec.stroke();
+
+          ec.font = '900 48px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFFFFF';
+          ec.fillText('对话式编程', rx + 225, 650);
+          ec.font = '900 40px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFB347';
+          ec.fillText('01  说清需求', rx + 225, 855);
+          ec.fillText('02  验收结果', rx + 225, 1085);
+        }
+
+        // SHOT 4 (15 - 21s)
+        if (t >= 15.0 && t < 21.0) {
+          const alpha = t > 20.4 ? 1 - norm(t, 20.4, 21.0) : norm(t, 15.0, 15.5);
+          ec.globalAlpha = clamp(alpha, 0, 1);
+
+          ec.font = '900 54px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFFFFF';
+          ec.fillText('当代码门槛归零，交付速度彻底重构', 540, 460);
+
+          const caps = [
+            { start: 15.35, metric: '30秒', title: '30秒生成原型', sub: '从一句模糊想法，瞬间点亮可交互页面', y: 600 },
+            { start: 16.65, metric: '0行', title: '0行手动代码', sub: '全程自然语言驱动，跳过繁琐底层语法', y: 890 },
+            { start: 17.95, metric: '100%', title: '100%自己把关', sub: '审美、交互与验收标准完全由你掌控', y: 1180 }
+          ];
+
+          caps.forEach((c) => {
+            const cp = easeOutBack(norm(t, c.start, c.start + 0.8));
+            if (cp <= 0) return;
+            ec.save();
+            ec.globalAlpha = clamp(alpha * norm(t, c.start, c.start + 0.4), 0, 1);
+            const cy = c.y + (1 - cp) * 60;
+            drawRoundedRect(ec, 90, cy, 900, 230, 38);
+            ec.fillStyle = 'rgba(17, 24, 42, 0.9)';
+            ec.fill();
+            ec.strokeStyle = 'rgba(255, 179, 71, 0.55)';
+            ec.lineWidth = 2.5;
+            ec.stroke();
+
+            ec.textAlign = 'left';
+            ec.font = '800 68px "JetBrains Mono", monospace';
+            ec.fillStyle = '#FFB347';
+            ec.fillText(c.metric, 145, cy + 115);
+
+            ec.font = '900 46px "Noto Sans SC", sans-serif';
+            ec.fillStyle = '#FFFFFF';
+            ec.fillText(c.title, 410, cy + 92);
+
+            ec.font = '500 24px "Noto Sans SC", sans-serif';
+            ec.fillStyle = '#94A3B8';
+            ec.fillText(c.sub, 410, cy + 150);
+            ec.restore();
+          });
+        }
+
+        // SHOT 5 (21 - 26s)
+        if (t >= 21.0 && t < 26.0) {
+          const alpha = t > 25.4 ? 1 - norm(t, 25.4, 26.0) : norm(t, 21.0, 21.5);
+          ec.globalAlpha = clamp(alpha, 0, 1);
+
+          ec.font = '900 76px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFFFFF';
+          ec.fillText('你负责定义方向，', 540, 895);
+
+          ec.font = '900 80px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFB347';
+          ec.fillText('Agent 负责把活干完', 540, 1035);
+        }
+
+        // SHOT 6 (26 - 30s)
+        if (t >= 26.0 && t <= 30.0) {
+          const enterP = easeOutBack(norm(t, 26.0, 26.8));
+          ec.globalAlpha = clamp(norm(t, 26.0, 26.5), 0, 1);
+          const cy = 540 + (1 - enterP) * 50;
+
+          drawRoundedRect(ec, 92, cy, 896, 820, 48);
+          ec.fillStyle = 'rgba(12, 18, 33, 0.94)';
+          ec.fill();
+          ec.strokeStyle = 'rgba(255, 179, 71, 0.55)';
+          ec.lineWidth = 2.5;
+          ec.stroke();
+
+          ec.font = '700 22px "JetBrains Mono", monospace';
+          ec.fillStyle = '#FFB347';
+          ec.fillText('STEAM VIP RESOURCE LIBRARY', 540, cy + 230);
+
+          ec.font = '900 64px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFFFFF';
+          ec.fillText('蒸汽会员资源库', 540, cy + 335);
+
+          ec.font = '800 46px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#FFB347';
+          ec.fillText('· 第6课演示作品 ·', 540, cy + 425);
+
+          ec.font = '500 28px "Noto Sans SC", sans-serif';
+          ec.fillStyle = '#94A3B8';
+          ec.fillText('“AI 对话式编程：从一句需求，到一个能验收的结果”', 540, cy + 555);
+
+          // Finale Progress Bar
+          const prog = easeInOutCubic(norm(t, 26.35, 29.65));
+          drawRoundedRect(ec, 164, cy + 680, 752, 12, 6);
+          ec.fillStyle = 'rgba(255, 255, 255, 0.12)';
+          ec.fill();
+
+          if (prog > 0.01) {
+            drawRoundedRect(ec, 164, cy + 680, 752 * prog, 12, 6);
+            ec.fillStyle = '#FFB347';
+            ec.fill();
+          }
+        }
+
+        ec.restore();
+      }
+
+      btnExportVideo.addEventListener('click', () => {
+        if (isExporting) {
+          if (activeRecorder && activeRecorder.state === 'recording') {
+            activeRecorder.stop();
+          }
+          return;
+        }
+
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = STAGE_W;
+        exportCanvas.height = STAGE_H;
+        const exportCtx = exportCanvas.getContext('2d');
+
+        // Prefer native MP4 (H.264/AVC1) if browser supports it, fallback to WebM VP9
+        const mimeTypes = [
+          'video/mp4;codecs=avc1.42E01E',
+          'video/mp4',
+          'video/webm;codecs=vp9',
+          'video/webm'
+        ];
+        let selectedMime = '';
+        for (const m of mimeTypes) {
+          if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) {
+            selectedMime = m;
+            break;
+          }
+        }
+
+        if (!selectedMime) {
+          alert('当前浏览器不支持 MediaRecorder 视频导出，请使用 Chrome 或 Edge 浏览器。');
+          return;
+        }
+
+        isExporting = true;
+        const ext = selectedMime.includes('mp4') ? 'mp4' : 'webm';
+        labelExport.textContent = '停止并保存';
+        exportOverlayBadge.style.display = 'inline-flex';
+
+        // Reset timeline to 0.0s for a clean 30s recording
+        elapsedTime = 0.0;
+        isPlaying = true;
+        lastFrameTime = performance.now();
+        updatePlayButtonUI();
+
+        const stream = exportCanvas.captureStream(60);
+        const chunks = [];
+        activeRecorder = new MediaRecorder(stream, {
+          mimeType: selectedMime,
+          videoBitsPerSecond: 16_000_000 // 16 Mbps crisp 1080x1920 quality
+        });
+
+        activeRecorder.ondataavailable = (ev) => {
+          if (ev.data && ev.data.size > 0) chunks.push(ev.data);
+        };
+
+        activeRecorder.onstop = () => {
+          isExporting = false;
+          labelExport.textContent = '导出视频';
+          exportOverlayBadge.style.display = 'none';
+
+          const blob = new Blob(chunks, { type: selectedMime });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `AI对话式编程-30s竖屏动态海报-1080x1920.${ext}`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        };
+
+        activeRecorder.start(200);
+        const recordStartPerf = performance.now();
+
+        function exportPump() {
+          if (!isExporting) return;
+          const recElapsed = (performance.now() - recordStartPerf) / 1000;
+          const pct = Math.min(100, Math.round((recElapsed / TOTAL_DURATION) * 100));
+          exportStatusText.textContent = `正在录制 1080×1920 (${ext.toUpperCase()}) · ${pct}%`;
+
+          renderCompositeExportFrame(exportCtx, elapsedTime);
+
+          if (recElapsed >= TOTAL_DURATION) {
+            if (activeRecorder && activeRecorder.state === 'recording') {
+              activeRecorder.stop();
+            }
+            return;
+          }
+          requestAnimationFrame(exportPump);
+        }
+
+        requestAnimationFrame(exportPump);
+      });
+    })();
+  </script>
+</body>
+</html>

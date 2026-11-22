@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#060810">
+  <title>AI 对话式编程 · 从一句需求，到一个能验收的结果</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f7f3ee;
+      --muted: #b0b2bd;
+      --gold: #ffc794;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 44%, #161927, #06080f 72%);
+      color: var(--ink);
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+    }
+
+    .poster {
+      --cycle: 30s;
+      --play: running;
+      width: min(100vw, 56.25vh);
+      width: min(100vw, 56.25dvh);
+      aspect-ratio: 9 / 16;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      container-type: inline-size;
+      background: linear-gradient(164deg, #0b1328 3%, #090d1a 47%, #070810 92%);
+      box-shadow: 0 0 0 1px #e5d9ff12, 0 20px 100px #0009;
+    }
+
+    .poster[data-paused] { --play: paused; }
+
+    .glow, #particles, .scene { position: absolute; inset: 0; }
+    .glow {
+      background: radial-gradient(ellipse at 50% 49%, #b0532b68, #67352344 24%, #24223c31 48%, transparent 72%);
+      opacity: .78;
+      transform-origin: 50% 49%;
+    }
+
+    #particles { width: 100%; height: 100%; pointer-events: none; }
+
+    .controls {
+      position: absolute;
+      z-index: 2;
+      top: max(4cqw, env(safe-area-inset-top));
+      right: max(4cqw, env(safe-area-inset-right));
+      display: flex;
+      align-items: center;
+      padding: 0 3px;
+      border: 1px solid #ffffff29;
+      border-radius: 999px;
+      background: #0d101bd9;
+    }
+
+    .controls[hidden] { display: none; }
+    .controls button {
+      min-height: 44px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: inherit;
+      background: transparent;
+      color: #e7dcd1;
+      font: 550 clamp(11px, 2.45cqw, 14px) / 1 system-ui, sans-serif;
+      cursor: pointer;
+    }
+
+    .controls button:hover { color: #fff; background: #ffffff13; }
+    .controls button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+    .controls .slash { color: #93909d; font-size: 12px; }
+
+    .scene {
+      display: grid;
+      place-items: center;
+      padding: 0 7.5cqw;
+      text-align: center;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    .opening { visibility: visible; opacity: 1; --effect: opening; }
+    .conversation { --effect: conversation; }
+    .comparison { --effect: comparison; }
+    .metrics { --effect: metrics; }
+    .handoff { --effect: handoff; }
+    .closing { --effect: closing; }
+
+    h1, h2, h3, p { margin: 0; }
+    .display { font-weight: 720; letter-spacing: -.036em; line-height: 1.23; }
+    .line { display: block; white-space: nowrap; }
+    .accent { color: var(--gold); }
+    .question { font-size: 9.3cqw; --effect: question; }
+    .question .line:first-child { font-size: .9em; }
+
+    .dialogue { display: grid; justify-items: center; gap: 7cqw; }
+    .bubble {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.05cqw;
+      width: 14cqw;
+      height: 10.5cqw;
+      border: max(1px, .3cqw) solid #ffbd8a;
+      border-radius: 3.45cqw;
+      background: #392319;
+      box-shadow: 0 0 5.8cqw #fa905c55, inset 0 0 2cqw #f291674b;
+      --at: 4.05s;
+    }
+
+    .bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -1.08cqw;
+      left: 2.9cqw;
+      width: 2cqw;
+      aspect-ratio: 1;
+      border-right: inherit;
+      border-bottom: inherit;
+      border-bottom-right-radius: .5cqw;
+      background: #392319;
+      transform: rotate(45deg);
+    }
+
+    .bubble i { width: 1.05cqw; aspect-ratio: 1; border-radius: 50%; background: #ffd2ad; }
+    .reply { font-size: 6.7cqw; line-height: 1.38; }
+    .reply .line:nth-child(2) { font-size: 1.08em; }
+    .letter { position: relative; display: inline-block; }
+
+    .typed .letter::after {
+      content: "";
+      position: absolute;
+      inset: .18em -.06em .14em auto;
+      width: max(1px, .055em);
+      border-radius: 1px;
+      background: #ffbc89;
+      opacity: 0;
+    }
+
+    .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 2.7cqw; width: 100%; }
+    .path {
+      --card: #1b1d27;
+      --edge: #80839152;
+      --toward: 22cqw;
+      padding: 5.2cqw 1.4cqw 5.8cqw;
+      border: max(1px, .15cqw) solid var(--edge);
+      border-radius: 3.1cqw;
+      background: linear-gradient(157deg, var(--card), #101019);
+    }
+
+    .path.warm {
+      --card: #4b2a1c;
+      --edge: #f3ab768c;
+      --toward: -22cqw;
+      background: radial-gradient(ellipse at 52% 0%, #6c3a23, #291c1a 78%);
+      box-shadow: 0 0 6cqw #ff8f553b, inset 0 0 5cqw #fe9c5a14;
+    }
+
+    .path h3 {
+      margin-inline: 2cqw;
+      padding-bottom: 3cqw;
+      border-bottom: 1px solid var(--edge);
+      color: #c4c6d0;
+      font-size: 4.35cqw;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .path.warm h3 { color: #ffcdab; }
+    .flow {
+      min-height: 34cqw;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: .9cqw;
+      padding-top: 2.7cqw;
+      font-size: 4.85cqw;
+      font-weight: 650;
+      line-height: 1.22;
+    }
+
+    .flow .arrow { color: #b2b4c0; transform: rotate(90deg); font: 400 3.9cqw / 1 system-ui; }
+    .warm .flow { font-size: 5.35cqw; gap: 2.2cqw; }
+    .warm .arrow { color: #ffd0a7; }
+    .warm strong { color: #ffd0a7; }
+
+    .trail {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      --effect: trail;
+    }
+
+    .trail i {
+      grid-area: 1 / 1;
+      width: 121cqw;
+      height: 17cqw;
+      border-radius: 50%;
+      border-top: max(1px, .22cqw) solid #ffb776;
+      border-right: 1px solid #ffb77618;
+      transform: rotate(-19deg);
+      mask-image: linear-gradient(90deg, transparent 3%, black 35%, black 65%, transparent 98%);
+    }
+
+    .trail i:nth-child(2) { height: 12cqw; transform: rotate(16deg); opacity: .75; }
+    .trail i:nth-child(3) { height: 22cqw; transform: rotate(-8deg); opacity: .4; }
+    .trail i:nth-child(4) {
+      width: 112cqw;
+      height: .6cqw;
+      border: none;
+      background: linear-gradient(90deg, transparent 12%, #ff995f, #fff0d4 50%, #ff995f, transparent 88%);
+      box-shadow: 0 0 3cqw 1cqw #ff9f674f;
+      transform: rotate(-8deg);
+    }
+
+    .capsules { z-index: 1; display: grid; gap: 3cqw; padding: 0; margin: 0; list-style: none; }
+    .capsule {
+      display: grid;
+      grid-template-columns: 27cqw 1fr;
+      align-items: baseline;
+      gap: 2.6cqw;
+      width: 74cqw;
+      padding: 2.8cqw 4.6cqw 3.35cqw;
+      border: max(1px, .14cqw) solid #f4ac7770;
+      border-radius: 999px;
+      background: linear-gradient(112deg, #4e2d24, #21191c 74%);
+      text-align: left;
+      font-size: 4.4cqw;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .capsule strong {
+      color: var(--gold);
+      font: 680 10cqw / 1 system-ui, sans-serif;
+      font-variant-numeric: lining-nums tabular-nums;
+      letter-spacing: -.055em;
+      text-align: right;
+    }
+
+    .capsule small { font-size: .55em; }
+    .decision { font-size: 7.75cqw; line-height: 1.32; }
+    .decision .line:nth-child(2) { margin-top: 3.4cqw; }
+    .decision .line:last-child { font-size: 1.3em; }
+
+    .end-card {
+      width: 100%;
+      padding: 9cqw 2cqw 6.5cqw;
+      border: max(1px, .13cqw) solid #e6b2934d;
+      border-radius: 3.3cqw;
+      background: linear-gradient(150deg, #261b1f, #13131d 72%);
+      --at: 26s;
+    }
+
+    .end-card h2 { font-size: 6.2cqw; line-height: 1.32; }
+    .end-card p {
+      display: inline-block;
+      padding: 3.8cqw 1.2cqw 0;
+      margin-top: 5.2cqw;
+      border-top: 1px solid #f2c3a94b;
+      color: #ddd0c5;
+      font-size: 3.65cqw;
+      font-weight: 550;
+    }
+
+    .progress {
+      position: absolute;
+      inset: auto 10cqw max(8cqw, env(safe-area-inset-bottom));
+      height: max(2px, .42cqw);
+      border-radius: 999px;
+      background: #c8b2c239;
+    }
+
+    .progress span {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      transform-origin: left;
+      transform: scaleX(0);
+      background: linear-gradient(90deg, #ef8c5d, #ffdab4);
+      box-shadow: 0 0 1.3cqw #ffb87b91;
+    }
+
+    /* All layers share the 30-second CSS clock. Only the particle field is drawn in JS. */
+    .playing :is(.scene, .glow, .question, .trail, .bubble, .capsule, .end-card, .path, .letter, .progress span),
+    .playing .typed .letter::after {
+      animation: var(--effect) var(--cycle) var(--curve, var(--ease)) infinite both;
+      animation-delay: calc(var(--at, 0s) - var(--cycle));
+      animation-play-state: var(--play);
+    }
+
+    .glow { --effect: breathe; --curve: cubic-bezier(.48, .02, .55, .98); }
+    .path { --effect: fold; --curve: cubic-bezier(.64, 0, .32, 1); }
+    :is(.bubble, .capsule, .end-card) { --effect: arrive; }
+    .typed .letter { --effect: type; --curve: step-end; }
+    .typed .letter::after { --effect: cursor; }
+    .lit .letter { --effect: highlight; }
+    .progress span { --effect: fill; --curve: linear; }
+    .playing .progress span { animation-delay: 0s; }
+
+    @keyframes opening {
+      0% { opacity: .22; visibility: visible; }
+      3%, 11.5% { opacity: 1; visibility: visible; }
+      13.333333%, 100% { opacity: 0; visibility: hidden; }
+    }
+
+    @keyframes question {
+      0% { transform: translateY(3.3cqw) scale(.93); }
+      3.1% { transform: translateY(-.45cqw) scale(1.017); }
+      5%, 11.2% { transform: none; }
+      13.33% { transform: translateY(-5.6cqw) scale(.98); }
+      100% { transform: translateY(-5.6cqw) scale(.98); }
+    }
+
+    @keyframes conversation {
+      0%, 13.333333% { opacity: 0; visibility: hidden; }
+      15.25%, 28.2% { opacity: 1; visibility: visible; }
+      30%, 100% { opacity: 0; visibility: hidden; }
+    }
+
+    @keyframes comparison {
+      0%, 30% { opacity: 0; visibility: hidden; }
+      32%, 49.35% { opacity: 1; visibility: visible; }
+      50.85%, 100% { opacity: 0; visibility: hidden; }
+    }
+
+    @keyframes metrics {
+      0%, 50% { opacity: 0; visibility: hidden; }
+      51.2%, 68.5% { opacity: 1; visibility: visible; }
+      70%, 100% { opacity: 0; visibility: hidden; }
+    }
+
+    @keyframes handoff {
+      0%, 70% { opacity: 0; visibility: hidden; }
+      71.85%, 85.2% { opacity: 1; visibility: visible; }
+      86.666667%, 100% { opacity: 0; visibility: hidden; }
+    }
+
+    @keyframes closing {
+      0%, 86.666667% { opacity: 0; visibility: hidden; }
+      88.5%, 100% { opacity: 1; visibility: visible; }
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: .66; transform: scale(.96); }
+      9% { opacity: 1; transform: scale(1.15); }
+      22% { opacity: .59; transform: scale(.93); }
+      46% { opacity: .7; transform: scale(1.05); }
+      52% { opacity: 1; transform: scale(1.18); }
+      65% { opacity: .56; transform: scale(.95); }
+      79% { opacity: 1; transform: scale(.85); }
+      90% { opacity: .5; transform: scale(.94); }
+    }
+
+    @keyframes arrive {
+      0%, 80%, 100% { opacity: 0; transform: translateY(3cqw) scale(.95); }
+      2.8%, 79.99% { opacity: 1; transform: none; }
+    }
+
+    @keyframes fold {
+      0%, 30% { transform: translateX(calc(var(--toward) * -.16)) scale(.96); }
+      33%, 48.2% { transform: none; }
+      50.85%, 100% { transform: translateX(var(--toward)) scale(.018, .032); }
+    }
+
+    @keyframes trail {
+      0%, 50% { opacity: 0; transform: scale(.15) rotate(6deg); }
+      51.7% { opacity: 1; transform: scale(.9) rotate(1deg); }
+      57% { opacity: .52; transform: scale(1.08) rotate(-3deg); }
+      66%, 100% { opacity: 0; transform: scale(1.22) rotate(-10deg); }
+    }
+
+    @keyframes type {
+      0%, 79.99% { opacity: 1; }
+      80%, 100% { opacity: 0; }
+    }
+
+    @keyframes cursor {
+      0% { opacity: .94; }
+      .31%, 100% { opacity: 0; }
+    }
+
+    @keyframes highlight {
+      0%, 80%, 100% { opacity: 0; transform: translateY(.24em); }
+      .68% { opacity: 1; color: #ffdbb8; text-shadow: 0 0 .42em #ff8d5f9c; transform: none; }
+      2.4%, 79.99% { opacity: 1; color: inherit; text-shadow: none; transform: none; }
+    }
+
+    @keyframes fill {
+      0%, 86.666667% { transform: scaleX(0); }
+      99.33%, 100% { transform: scaleX(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .playing :is(.glow, .question, .bubble, .capsule, .end-card, .path, .letter, .trail) {
+        transform: none !important;
+      }
+      .playing .trail, .playing .typed .letter::after { display: none; }
+      .playing .lit .letter { text-shadow: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="poster" aria-label="AI 对话式编程动态概念海报">
+    <div class="glow" aria-hidden="true"></div>
+    <canvas id="particles" width="1080" height="1920" aria-hidden="true"></canvas>
+
+    <div class="controls" role="group" aria-label="播放控制" hidden>
+      <button id="replay" type="button">重播</button>
+      <span class="slash" aria-hidden="true">/</span>
+      <button id="play" type="button">暂停</button>
+    </div>
+
+    <section class="scene opening">
+      <h1 class="display question">
+        <span class="line">普通人做软件，</span>
+        <span class="line">最大的门槛</span>
+        <span class="line accent">是什么？</span>
+      </h1>
+    </section>
+
+    <section class="scene conversation">
+      <div class="dialogue">
+        <div class="bubble" aria-hidden="true"><i></i><i></i><i></i></div>
+        <h2 class="display reply typed" aria-label="不是不会写代码，而是不敢开始第一句对话">
+          <span class="line">不是不会写代码，</span>
+          <span class="line accent">而是不敢开始</span>
+          <span class="line accent">第一句对话</span>
+        </h2>
+      </div>
+    </section>
+
+    <section class="scene comparison" aria-label="两种编程方式">
+      <div class="paths">
+        <article class="path">
+          <h3>传统方式</h3>
+          <p class="flow"><span>学语法</span><span class="arrow">→</span><span>写代码</span><span class="arrow">→</span><span>改报错</span></p>
+        </article>
+        <article class="path warm">
+          <h3>对话式编程</h3>
+          <p class="flow"><span>说清需求</span><span class="arrow">→</span><strong>验收结果</strong></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="scene metrics" aria-label="原型演示数据">
+      <div class="trail" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <ul class="capsules" role="list">
+        <li class="capsule" style="--at: 15.72s"><strong>30</strong><span>秒生成原型</span></li>
+        <li class="capsule" style="--at: 16.44s"><strong>0</strong><span>行手动代码</span></li>
+        <li class="capsule" style="--at: 17.16s"><strong>100<small>%</small></strong><span>自己把关</span></li>
+      </ul>
+    </section>
+
+    <section class="scene handoff">
+      <h2 class="display decision lit" aria-label="你负责定义方向，Agent 负责把活干完">
+        <span class="line">你负责定义方向，</span>
+        <span class="line">Agent 负责</span>
+        <span class="line accent">把活干完</span>
+      </h2>
+    </section>
+
+    <section class="scene closing">
+      <div class="end-card">
+        <h2 class="display">
+          <span class="line">从一句需求，</span>
+          <span class="line accent">到一个能验收的结果。</span>
+        </h2>
+        <p>蒸汽会员资源库 · 第6课演示作品</p>
+      </div>
+      <div class="progress" aria-hidden="true"><span></span></div>
+    </section>
+  </main>
+
+  <script>
+    const poster = document.querySelector('.poster');
+    const controls = document.querySelector('.controls');
+    const playButton = document.querySelector('#play');
+    const progress = document.querySelector('.progress span');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    for (const [selector, start, interval] of [['.typed', 4.74, .098], ['.lit', 21.43, .116]]) {
+      let index = 0;
+      for (const line of document.querySelectorAll(`${selector} .line`)) {
+        const letters = Array.from(line.textContent, character => {
+          const letter = document.createElement('span');
+          letter.className = 'letter';
+          letter.textContent = character === ' ' ? '\u00a0' : character;
+          letter.style.setProperty('--at', `${start + interval * index++}s`);
+          return letter;
+        });
+        line.setAttribute('aria-hidden', 'true');
+        line.replaceChildren(...letters);
+      }
+    }
+
+    const canvas = document.querySelector('#particles');
+    const ctx = canvas.getContext('2d');
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = 48;
+    const brush = sprite.getContext('2d');
+
+    if (brush) {
+      const glow = brush.createRadialGradient(24, 24, 0, 24, 24, 24);
+      glow.addColorStop(0, '#fff4de');
+      glow.addColorStop(.17, '#ffc08c');
+      glow.addColorStop(.39, '#ff9b6370');
+      glow.addColorStop(1, '#ff815000');
+      brush.fillStyle = glow;
+      brush.fillRect(0, 0, 48, 48);
+    }
+
+    const points = Array.from({ length: 104 }, () => ({
+      x: Math.random() - .5,
+      y: Math.random() - .5,
+      size: 6 + Math.random() ** 2 * 18,
+      phase: Math.random() * Math.PI * 2,
+      speed: 1 + Math.floor(Math.random() * 3),
+      light: .18 + Math.random() * .44
+    }));
+
+    let clock;
+    let duration;
+    let frame = 0;
+    let paused = false;
+
+    function easeBetween(time, start, end) {
+      const fraction = Math.max(0, Math.min(1, (time - start) / (end - start)));
+      return fraction * fraction * (3 - 2 * fraction);
+    }
+
+    function draw() {
+      if (!ctx || !brush || !clock) return;
+      const time = ((clock.currentTime ?? 0) % duration) / 1000;
+      const phase = time * 2000 * Math.PI / duration;
+      const still = reducedMotion.matches;
+      const gather = still ? 0 : easeBetween(time, 20.8, 24.5) * (1 - easeBetween(time, 25.5, 28.7));
+      const fade = 1 - .66 * easeBetween(time, 25.6, 26.7) * (1 - easeBetween(time, 29, 30));
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.scale(canvas.width / 1080, canvas.height / 1920);
+      for (const point of points) {
+        const wave = point.phase + (still ? 0 : phase * point.speed);
+        const x = 540 + (1080 * point.x + 36 * Math.cos(wave)) * (1 - .79 * gather);
+        const y = 935 + (1780 * point.y + 48 * Math.sin(wave)) * (1 - .81 * gather);
+        const size = point.size * (1 + gather * .37);
+        ctx.globalAlpha = point.light * (.64 + .36 * Math.sin(wave)) * fade;
+        ctx.drawImage(sprite, x - size / 2, y - size / 2, size, size);
+      }
+      ctx.restore();
+    }
+
+    function tick() {
+      draw();
+      frame = requestAnimationFrame(tick);
+    }
+
+    function syncPlayback() {
+      const frozen = paused || document.hidden;
+      poster.toggleAttribute('data-paused', frozen);
+      playButton.textContent = paused ? '继续' : '暂停';
+      cancelAnimationFrame(frame);
+      if (frozen || reducedMotion.matches) draw();
+      else frame = requestAnimationFrame(tick);
+    }
+
+    function replay() {
+      paused = false;
+      poster.classList.remove('playing');
+      void poster.offsetWidth;
+      poster.classList.add('playing');
+      clock = progress.getAnimations()[0];
+      duration = clock.effect.getTiming().duration;
+      syncPlayback();
+    }
+
+    new ResizeObserver(() => {
+      const scale = Math.min(1, poster.clientWidth * (devicePixelRatio || 1) / 1080);
+      canvas.width = Math.max(1, Math.round(1080 * scale));
+      canvas.height = Math.max(1, Math.round(1920 * scale));
+      draw();
+    }).observe(poster);
+
+    document.querySelector('#replay').addEventListener('click', replay);
+    playButton.addEventListener('click', () => {
+      paused = !paused;
+      syncPlayback();
+    });
+    document.addEventListener('visibilitychange', syncPlayback);
+    reducedMotion.addEventListener('change', syncPlayback);
+    controls.hidden = false;
+    replay();
+  </script>
+</body>
+</html>

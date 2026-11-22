@@ -91,7 +91,10 @@
       var downloads = (it.downloads || []).map(function (file) {
         return '<a class="btn" href="' + esc(file.url) + '" download="' + esc(file.name) + '">' + esc(file.label) + '</a>';
       }).join("");
-      var b = '<div class="goal">目标：' + esc(it.goal) + "</div>" + (it.demoUrl || downloads ? '<div class="links">' + (it.demoUrl ? btn(it.demoLabel || "打开安装演示", it.demoUrl, true) : "") + downloads + "</div>" : "") + "<h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4><p>" + esc(it.practice) + "</p><h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
+      var links = (it.links || []).map(function (link) {
+        return btn(link.label, link.url, false);
+      }).join("");
+      var b = '<div class="goal">目标：' + esc(it.goal) + "</div>" + (it.demoUrl || links || downloads ? '<div class="links">' + (it.demoUrl ? btn(it.demoLabel || "打开安装演示", it.demoUrl, true) : "") + links + downloads + "</div>" : "") + "<h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4><p>" + esc(it.practice) + "</p><h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
       return { tag: "details", cls: "", html: '<summary><span class="no">' + esc(no) + '</span><span class="tt">' + esc(it.title) + '</span></summary><div class="ans">' + b + "</div>" };
     },
     faq: function (it) { return { tag: "details", cls: "", html: '<summary><span class="tt">' + esc(it.q) + '</span></summary><div class="ans">' + it.a + "</div>" }; },
