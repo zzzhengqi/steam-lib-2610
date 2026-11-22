@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f6f8">
+<title>今日清单 · 让每一天，轻一点</title>
+<style>
+:root{color-scheme:light;--bg:#f5f6f8;--ink:#252b36;--muted:#727781;--line:#eceef1;--orange:#c95121;--orange-hover:#ae4017;--orange-soft:#fff2e9;--blue:#3575cd;--radius:20px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg);font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer}button,input{touch-action:manipulation}button{border:0}button:disabled{cursor:default;opacity:.6}button:active:not(:disabled){transform:translateY(1px)}button,input{transition:background .16s,border-color .16s,box-shadow .16s,transform .12s}button:focus-visible,input:focus-visible{outline:3px solid #90b8f0;outline-offset:3px}input{caret-color:var(--blue)}::selection{background:#dceaff}svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}button svg{pointer-events:none}[hidden]{display:none!important}
+.shell{max-width:1180px;margin:auto;padding:0 38px}.brandbar{height:104px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e4e7eb}.brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:750;letter-spacing:.02em}.logo{width:36px;height:36px;border-radius:12px;background:var(--orange);color:white;display:grid;place-items:center}.logo svg{width:23px;height:23px}.local-note{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}.local-note svg{width:15px;height:15px}.page-head{padding:42px 0 30px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px}h1{font-size:34px;line-height:1.3;letter-spacing:-.025em;margin:0 0 10px;font-weight:750}.subtitle{margin:0;color:var(--muted);font-size:14px;line-height:1.8}.date{display:flex;gap:9px;align-items:center;font-size:13px;color:#656c78;padding-bottom:4px;white-space:nowrap}.date svg{width:17px;height:17px}
+.workspace{display:grid;grid-template-columns:318px minmax(0,1fr);gap:24px;align-items:start}.sidebar{display:grid;gap:20px}.panel{background:white;border-radius:var(--radius)}.progress-panel{padding:26px 26px 24px}.section-heading{margin:0;font-size:16px;font-weight:700}.progress-title{display:flex;align-items:center;justify-content:space-between;gap:10px}.percentage{font-size:13px;font-weight:650;color:var(--orange);font-variant-numeric:tabular-nums;background:var(--orange-soft);padding:5px 9px;border-radius:7px}.progress-count{margin:24px 0 14px;font-size:13px;color:var(--muted)}.progress-count strong{font-size:32px;color:var(--ink);font-weight:650;line-height:1;letter-spacing:-.04em;margin-right:6px;font-variant-numeric:tabular-nums}.track{height:7px;background:#f0f1f3;border-radius:9px;overflow:hidden}.fill{height:100%;width:0;background:var(--orange);border-radius:9px;transition:width .3s ease-out}.progress-caption{font-size:12px;color:var(--muted);margin:14px 0 0;line-height:1.7}.add-panel{padding:26px}.add-description{font-size:12px;color:var(--muted);line-height:1.7;margin:8px 0 22px}.field-label{display:block;font-size:12px;font-weight:650;margin-bottom:9px}.task-input{width:100%;min-width:0;border:1px solid #dce0e6;background:#fff;border-radius:10px;padding:13px 12px;font-size:14px;color:var(--ink);line-height:1.5}.task-input::placeholder{color:#7a818c}.task-input:hover{border-color:#a7b0be}.task-input:focus{border-color:var(--blue)}.task-input[aria-invalid=true]{border-color:#b84426}.field-error{font-size:12px;line-height:1.6;color:#af3b20;margin:8px 0 0}.priority-option{display:flex;align-items:center;gap:8px;color:#656c78;font-size:12px;margin:15px 0 22px;cursor:pointer;min-height:28px}.priority-option input{accent-color:var(--orange);width:16px;height:16px;margin:0}.priority-option svg{width:15px;height:15px}.primary{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--orange);color:#fff;border-radius:10px;min-height:46px;padding:12px 17px;font-size:14px;font-weight:650}.primary:hover{background:var(--orange-hover)}.add-button{width:100%}.primary svg{width:18px;height:18px}.keyboard-hint{text-align:center;color:var(--muted);font-size:11px;margin:13px 0 0}.sidebar-note{padding:0 9px;display:flex;gap:10px;color:#737b86;font-size:12px;line-height:1.8}.sidebar-note svg{width:17px;height:17px;margin-top:2px;color:#8b929d}
+.list-panel{min-height:530px;padding:28px 30px 0;overflow:hidden}.list-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.list-heading h2{font-size:18px;margin:0;letter-spacing:-.02em}.remaining{font-size:12px;color:var(--muted)}.remaining strong{color:var(--orange);font-weight:650}.list-toolbar{margin-top:24px;padding-bottom:20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}.filters{display:flex;background:#f3f4f6;padding:4px;border-radius:10px;gap:3px}.filter{background:transparent;border-radius:7px;padding:8px 12px;color:#626a76;font-size:12px;display:flex;align-items:center;gap:7px;min-height:34px}.filter:hover{background:#e8ebef}.filter[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 2px 5px #1d293b0b;font-weight:650}.filter-count{font-size:10px;color:#737b87;font-variant-numeric:tabular-nums}.filter[aria-pressed=true] .filter-count{color:var(--orange)}.list-tip{font-size:11px;color:#858b95;white-space:nowrap}.tasks{list-style:none;padding:0;margin:0}.task{display:flex;align-items:flex-start;gap:12px;padding:21px 0;border-bottom:1px solid var(--line)}.check{appearance:none;-webkit-appearance:none;width:21px;height:21px;border:1.5px solid #c8cfd7;border-radius:7px;margin:3px 0 0;flex-shrink:0;cursor:pointer;display:grid;place-items:center;background:white}.check:hover{border-color:var(--orange);background:#fff8f3}.check:checked{background:var(--orange);border-color:var(--orange)}.check:checked:after{content:"";width:8px;height:4px;border:solid white;border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg)}.task-body{flex:1;min-width:0}.task-name{display:block;font-size:14px;line-height:1.9;overflow-wrap:anywhere;cursor:pointer;color:var(--ink)}.task.done .task-name{color:#858b94;text-decoration:line-through;text-decoration-color:#b2b7be}.task-meta{font-size:11px;color:#8a9099;display:flex;gap:8px;align-items:center;margin-top:4px;line-height:1.5}.important-tag{font-size:10px;color:#ac461e;background:#fff2e8;border-radius:4px;padding:2px 6px;display:inline-flex;gap:3px;align-items:center}.important-tag svg{width:11px;height:11px}.task-actions{display:flex;gap:2px;margin-top:-3px;flex-shrink:0}.icon-button{display:grid;place-items:center;width:34px;height:36px;border-radius:8px;background:transparent;color:#8a929e}.icon-button svg{width:17px;height:17px}.icon-button:hover{background:#f2f4f7;color:#414d61}.icon-button.important{color:var(--orange)}.icon-button.important svg{fill:#fff0e4}.icon-button.danger:hover{background:#fff0ed;color:#b23d25}.list-bottom{display:flex;justify-content:space-between;align-items:center;padding:19px 0;color:#7b838f;font-size:11px;gap:12px}.save-state{display:flex;gap:5px;align-items:center}.save-state svg{width:13px;height:13px;color:#748a79}.edit-form{display:flex;flex-wrap:wrap;gap:8px;width:100%;padding:2px 0}.edit-form .task-input{flex-basis:100%;font-size:14px;padding:9px 10px}.edit-form .primary,.secondary{font-size:12px;min-height:36px;padding:8px 12px;border-radius:7px}.secondary{background:#f0f2f5;color:#5b6473}.secondary:hover{background:#e4e8ee}.edit-error{flex-basis:100%;margin:0}.empty{text-align:center;padding:58px 12px 60px}.empty-symbol{display:grid;place-items:center;background:#fff3e9;color:var(--orange);width:54px;height:54px;border-radius:18px;margin:0 auto 18px}.empty-symbol svg{width:26px;height:26px}.empty h3{font-size:16px;margin:0 0 9px}.empty p{font-size:12px;color:var(--muted);line-height:1.8;margin:0 auto 20px;max-width:260px}.empty button{margin:auto}.footer{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:#828994;padding:30px 0 36px}.footer span:last-child{letter-spacing:.1em}.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:calc(100% - 32px);background:#283340;color:white;border-radius:12px;box-shadow:0 8px 30px #1f29371a;padding:13px 16px;display:flex;gap:20px;align-items:center;z-index:10;font-size:13px;line-height:1.6;animation:toast-in .18s ease-out}.toast button{background:transparent;color:#ffbd91;font-size:13px;white-space:nowrap;padding:6px}.toast button:hover{color:white}.storage-error{color:#a23b21;background:#fff0e9;border-radius:10px;padding:13px 16px;line-height:1.7;font-size:12px;margin-bottom:20px}.toast-text{overflow-wrap:anywhere}.visually-hidden{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden;white-space:nowrap}@keyframes toast-in{from{opacity:0;margin-bottom:-6px}to{opacity:1;margin-bottom:0}}
+@media(max-width:1000px){.shell{padding:0 28px}.workspace{grid-template-columns:280px minmax(0,1fr);gap:20px}.progress-panel,.add-panel{padding:23px}.list-panel{padding:25px 23px 0}.list-tip{display:none}.filter{padding:8px 10px}.task{gap:10px}.task-actions{gap:0}.icon-button{width:30px}}
+@media(max-width:740px){.shell{max-width:580px;padding:0 20px}.brandbar{height:78px}.brand{font-size:18px}.local-note{font-size:11px}.local-note span{display:none}.page-head{padding:30px 0 24px;display:block}h1{font-size:29px}.subtitle{font-size:13px}.date{margin-top:16px;font-size:12px}.workspace{grid-template-columns:1fr;gap:20px}.sidebar{gap:16px}.progress-panel{padding:22px 23px}.progress-count{margin-top:18px}.progress-caption{margin-top:10px}.add-panel{padding:23px}.add-description{margin-bottom:17px}.priority-option{margin:12px 0 16px}.keyboard-hint,.sidebar-note{display:none}.list-panel{min-height:360px;padding:24px 20px 0}.list-toolbar{margin-top:20px}.filter{padding:8px 12px}.task{padding:19px 0}.icon-button{width:32px;min-height:38px}.task-actions{margin-top:-4px}.task-name{font-size:14px}.remaining{font-size:11px}.list-bottom{font-size:10px}.footer{font-size:10px;padding:24px 0 80px}.footer span:last-child{display:none}.toast{bottom:18px;width:max-content}.list-heading h2{font-size:17px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none" xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 11h16m-11 4h2m3 0h1"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M9 10V7a3 3 0 0 1 6 0v3m-3 4v2"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3L3 9.6l6.2-.9Z"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l5-1L20 8a2.1 2.1 0 0 0-5-5L4 14Z"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V4h6v2M6 6l1 14h10l1-14M10 10v6m4-6v6"/></symbol>
+<symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c-4-9 3-14 14-14 0 11-5 18-14 14Zm0 0L15 9"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h7M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+</defs></svg>
+<div class="shell">
+<header class="brandbar"><div class="brand"><span class="logo"><svg aria-hidden="true"><use href="#i-check"/></svg></span>今日清单</div><div class="local-note"><svg aria-hidden="true"><use href="#i-lock"/></svg><span>只在你的设备上</span></div></header>
+<main>
+<div class="page-head"><div><h1>让每一天，轻一点。</h1><p class="subtitle">不必一次做完所有事，从眼前的一件开始。</p></div><time class="date" id="date"></time></div>
+<p id="storage-error" class="storage-error" role="alert" hidden></p>
+<div class="workspace">
+<aside class="sidebar" aria-label="进度与新增任务">
+<section class="panel progress-panel" aria-labelledby="progress-heading"><div class="progress-title"><h2 id="progress-heading" class="section-heading">今天的进度</h2><span class="percentage" id="percentage">0%</span></div><p class="progress-count"><strong id="done-count">0</strong><span id="total-count"> / 3 件已完成</span></p><div class="track" role="progressbar" id="progress" aria-label="任务完成进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill" class="fill"></div></div><p class="progress-caption" id="progress-caption">每完成一件，都在向前一点。</p></section>
+<section class="panel add-panel" aria-labelledby="add-heading"><h2 id="add-heading" class="section-heading">留给今天的一件事</h2><p class="add-description">把想做的写下来，给头脑腾点空间。</p><form id="add-form" novalidate><label class="field-label" for="task-input">任务内容</label><input id="task-input" class="task-input" placeholder="例如：出门散步 20 分钟" autocomplete="off" aria-describedby="add-error"><p id="add-error" class="field-error" role="alert" hidden></p><label class="priority-option"><input id="new-important" type="checkbox"><svg aria-hidden="true"><use href="#i-star"/></svg>标记为重要</label><button class="primary add-button" type="submit"><svg aria-hidden="true"><use href="#i-plus"/></svg>添加任务</button><p class="keyboard-hint">也可以按 Enter 快速添加</p></form></section>
+<p class="sidebar-note"><svg aria-hidden="true"><use href="#i-leaf"/></svg><span>给重要的事一点时间，<br>也给自己一点余地。</span></p>
+</aside>
+<section class="panel list-panel" aria-labelledby="list-heading"><div class="list-heading"><h2 id="list-heading">我的任务</h2><span id="remaining" class="remaining"></span></div><div class="list-toolbar"><div class="filters" role="group" aria-label="筛选任务"><button class="filter" type="button" data-filter="all" aria-pressed="true">全部 <span class="filter-count" id="all-count">3</span></button><button class="filter" type="button" data-filter="active" aria-pressed="false">待办 <span class="filter-count" id="active-count">3</span></button><button class="filter" type="button" data-filter="done" aria-pressed="false">已完成 <span class="filter-count" id="completed-count">0</span></button></div><span class="list-tip">小步向前，也很好</span></div>
+<ul class="tasks" id="tasks" aria-label="任务清单"></ul><div class="empty" id="empty" hidden><div class="empty-symbol"><svg aria-hidden="true"><use href="#i-list"/></svg></div><h3 id="empty-title"></h3><p id="empty-description"></p><button id="empty-action" class="secondary" type="button"></button></div>
+<div class="list-bottom"><span class="save-state"><svg aria-hidden="true"><use href="#i-check"/></svg><span id="save-state">已保存在此浏览器</span></span><span>按自己的节奏来</span></div></section>
+</div>
+</main><footer class="footer"><span>今日清单 · 日常小事，也值得认真对待</span><span>一点专注，一点从容</span></footer>
+</div>
+<div class="toast" id="toast" hidden><span class="toast-text" id="toast-text" role="status" aria-live="polite"></span><button id="undo" type="button" hidden>撤销删除</button><button id="dismiss" type="button" aria-label="关闭提示">关闭</button></div>
+<script>
+'use strict';
+const KEY='practice-todo-v1';
+const $=id=>document.getElementById(id);
+const icon=name=>{const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('aria-hidden','true');const use=document.createElementNS(svg.namespaceURI,'use');use.setAttribute('href','#i-'+name);svg.append(use);return svg;};
+const uid=()=>globalThis.crypto?.randomUUID?.() || Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+let tasks=[],filter='all',editing=null,deleted=[],toastTimer,storageBlocked=false;
+try{
+ const raw=localStorage.getItem(KEY);
+ if(raw===null){tasks=['喝水','整理桌面','阅读 10 分钟'].map(text=>({id:uid(),text,done:false,important:false}));}
+ else{
+  const parsed=JSON.parse(raw);
+  if(!Array.isArray(parsed)||!parsed.every(item=>item&&typeof item.text==='string'&&item.text.trim()&&typeof item.done==='boolean'))throw new Error('invalid');
+  const ids=new Set();
+  tasks=parsed.map(item=>{let id=typeof item.id==='string'&&item.id&&!ids.has(item.id)?item.id:uid();ids.add(id);return{...item,id,important:item.important===true};});
+ }
+}catch(error){storageBlocked=true;$('storage-error').textContent='暂时无法读取原有清单。为保护数据，已暂停修改，请检查浏览器本地存储权限后刷新；原数据不会被覆盖。';$('storage-error').hidden=false;}
+function save(){
+ if(storageBlocked)return false;
+ try{localStorage.setItem(KEY,JSON.stringify(tasks));$('storage-error').hidden=true;$('save-state').textContent='已保存在此浏览器';return true;}
+ catch(error){$('storage-error').hidden=false;$('storage-error').textContent='本次修改尚未保存。请允许浏览器使用本地存储，或释放存储空间后重试；刷新前请保留此页面。';$('save-state').textContent='尚未保存';return false;}
+}
+function notify(text,undo=deleted.length>0){clearTimeout(toastTimer);$('toast-text').textContent=text;$('undo').hidden=!undo;$('toast').hidden=false;if(!undo)toastTimer=setTimeout(()=>{$('toast').hidden=true;},3200);}
+function commit(text){const saved=save();render();notify(saved?text:text+'；尚未保存');}
+function updateDate(){const now=new Date();$('date').replaceChildren(icon('calendar'),document.createTextNode(new Intl.DateTimeFormat('zh-CN',{month:'long',day:'numeric',weekday:'long'}).format(now)));$('date').dateTime=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');}
+updateDate();setInterval(updateDate,60000);
+function actionButton(name,label,handler,className=''){const b=document.createElement('button');b.type='button';b.className='icon-button '+className;b.title=label;b.setAttribute('aria-label',label);b.append(icon(name));b.addEventListener('click',handler);b.disabled=storageBlocked;return b;}
+function focusRow(id,selector){const row=Array.from($('tasks').children).find(el=>el.dataset.id===id);row?.querySelector(selector)?.focus();}
+function editTask(task){editing=task.id;render();const input=$('edit-input');input?.focus();input?.select();}
+function render(){
+ const done=tasks.filter(t=>t.done).length,remaining=tasks.length-done,percent=tasks.length?Math.round(done/tasks.length*100):0;
+ $('done-count').textContent=done;$('total-count').textContent=' / '+tasks.length+' 件已完成';$('percentage').textContent=percent+'%';$('progress-fill').style.width=percent+'%';$('progress').setAttribute('aria-valuenow',percent);$('progress').setAttribute('aria-valuetext',`共 ${tasks.length} 件任务，已完成 ${done} 件`);
+ $('progress-caption').textContent=tasks.length===0?'从一件小事开始，今天由你安排。':remaining===0?'今天的清单完成了，给自己一个肯定。':'每完成一件，都在向前一点。';
+ $('remaining').replaceChildren(document.createTextNode('还有 '));const count=document.createElement('strong');count.textContent=remaining;$('remaining').append(count,document.createTextNode(' 件待办'));
+ $('all-count').textContent=tasks.length;$('active-count').textContent=remaining;$('completed-count').textContent=done;
+ document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));
+ const visible=tasks.filter(t=>filter==='all'||(filter==='done'?t.done:!t.done));
+ $('tasks').replaceChildren();
+ visible.forEach(task=>{
+  const row=document.createElement('li');row.className='task'+(task.done?' done':'');row.dataset.id=task.id;
+  const check=document.createElement('input');check.type='checkbox';check.className='check';check.checked=task.done;check.id='check-'+task.id;check.setAttribute('aria-label',(task.done?'标为待办：':'完成：')+task.text);check.disabled=storageBlocked;
+  check.addEventListener('change',()=>{task.done=check.checked;commit(task.done?'又完成一件，做得很好。':'已恢复为待办');const target=Array.from($('tasks').children).find(el=>el.dataset.id===task.id)?.querySelector('.check');(target||document.querySelector('[data-filter][aria-pressed=true]')).focus();});row.append(check);
+  const body=document.createElement('div');body.className='task-body';
+  if(editing===task.id){
+   const form=document.createElement('form');form.className='edit-form';form.noValidate=true;
+   const input=document.createElement('input');input.id='edit-input';input.className='task-input';input.value=task.text;input.setAttribute('aria-label','编辑任务内容');input.setAttribute('aria-describedby','edit-error');
+   const error=document.createElement('p');error.id='edit-error';error.className='field-error edit-error';error.setAttribute('role','alert');error.hidden=true;
+   const confirm=document.createElement('button');confirm.type='submit';confirm.className='primary';confirm.textContent='保存';
+   const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='取消';
+   const cancelEdit=()=>{editing=null;render();focusRow(task.id,'[data-action=edit]');};cancel.addEventListener('click',cancelEdit);
+   input.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();cancelEdit();}});
+   input.addEventListener('input',()=>{error.hidden=true;input.removeAttribute('aria-invalid');});
+   form.addEventListener('submit',e=>{e.preventDefault();const text=input.value.trim();if(!text){error.textContent='任务内容不能为空，写点什么再保存吧。';error.hidden=false;input.setAttribute('aria-invalid','true');input.focus();return;}task.text=text;editing=null;commit('任务已更新');focusRow(task.id,'[data-action=edit]');});
+   form.append(input,error,confirm,cancel);body.append(form);
+  }else{
+   const name=document.createElement('label');name.className='task-name';name.htmlFor=check.id;name.textContent=task.text;body.append(name);
+   const meta=document.createElement('div');meta.className='task-meta';
+   if(task.important){const tag=document.createElement('span');tag.className='important-tag';tag.append(icon('star'),document.createTextNode('重要'));meta.append(tag);}
+   const status=document.createElement('span');status.textContent=task.done?'已完成':'待完成';meta.append(status);body.append(meta);
+  }
+  row.append(body);
+  if(editing!==task.id){const actions=document.createElement('div');actions.className='task-actions';
+   const star=actionButton('star',(task.important?'取消重要：':'标为重要：')+task.text,()=>{task.important=!task.important;commit(task.important?'已标记为重要':'已设为普通任务');focusRow(task.id,'[data-action=important]');},task.important?'important':'');star.dataset.action='important';star.setAttribute('aria-pressed',String(task.important));
+   const edit=actionButton('edit','编辑：'+task.text,()=>editTask(task));edit.dataset.action='edit';
+   const remove=actionButton('trash','删除：'+task.text,()=>{const index=tasks.findIndex(t=>t.id===task.id);deleted.push({task,index});tasks.splice(index,1);const saved=save();render();notify(saved?'任务已删除，可撤销恢复':'任务已删除；尚未保存，可撤销恢复',true);$('undo').focus();},'danger');
+   actions.append(star,edit,remove);row.append(actions);
+  }
+  $('tasks').append(row);
+ });
+ $('empty').hidden=visible.length>0;
+ if(!visible.length){const nothing=tasks.length===0;$('empty-title').textContent=storageBlocked?'清单暂时无法读取':nothing?'今天，留一点空间':filter==='done'?'完成的事，会出现在这里':'待办都完成了';$('empty-description').textContent=storageBlocked?'请查看上方提示，原有数据已受到保护。':nothing?'写下一件想做的小事，给今天一个轻松的开始。':filter==='done'?'不着急，先从一件小事开始。':'给自己一点休息，也可以安排下一件事。';$('empty-action').textContent=nothing?'添加第一件任务':filter==='done'?'看看待办':'查看全部任务';$('empty-action').hidden=storageBlocked;}
+ $('task-input').disabled=storageBlocked;$('new-important').disabled=storageBlocked;document.querySelector('.add-button').disabled=storageBlocked;
+}
+$('add-form').addEventListener('submit',e=>{e.preventDefault();if(storageBlocked)return;const text=$('task-input').value.trim();if(!text){$('add-error').textContent='还没写内容呢，先输入一件想做的事吧。';$('add-error').hidden=false;$('task-input').setAttribute('aria-invalid','true');$('task-input').focus();return;}
+ tasks.push({id:uid(),text,done:false,important:$('new-important').checked});filter=filter==='done'?'all':filter;editing=null;$('task-input').value='';$('new-important').checked=false;$('add-error').hidden=true;$('task-input').removeAttribute('aria-invalid');commit('已添加，给今天一个小小的开始。');$('task-input').focus();});
+$('task-input').addEventListener('input',()=>{$('add-error').hidden=true;$('task-input').removeAttribute('aria-invalid');});
+document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{filter=button.dataset.filter;editing=null;render();}));
+$('empty-action').addEventListener('click',()=>{if(tasks.length===0){$('task-input').focus();}else{filter=filter==='done'?'active':'all';render();document.querySelector('[data-filter][aria-pressed=true]').focus();}});
+$('undo').addEventListener('click',()=>{if(!deleted.length)return;const entry=deleted.pop();tasks.splice(Math.min(entry.index,tasks.length),0,entry.task);filter='all';editing=null;const saved=save();render();notify(saved?'已恢复任务':'已恢复任务；尚未保存',deleted.length>0);focusRow(entry.task.id,'.check');});
+$('dismiss').addEventListener('click',()=>{$('toast').hidden=true;clearTimeout(toastTimer);deleted=[];});
+if(!storageBlocked)save();render();
+</script>
+</body>
+</html>
+
