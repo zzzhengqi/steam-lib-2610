@@ -94,7 +94,8 @@
       var links = (it.links || []).map(function (link) {
         return btn(link.label, link.url, false);
       }).join("");
-      var b = '<div class="goal">目标：' + esc(it.goal) + "</div>" + (it.demoUrl || links || downloads ? '<div class="links">' + (it.demoUrl ? btn(it.demoLabel || "打开安装演示", it.demoUrl, true) : "") + links + downloads + "</div>" : "") + "<h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4><p>" + esc(it.practice) + "</p><h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
+      var practice = Array.isArray(it.practice) ? ul(it.practice) : "<p>" + esc(it.practice) + "</p>";
+      var b = '<div class="goal">目标：' + esc(it.goal) + "</div>" + (it.demoUrl || links || downloads ? '<div class="links">' + (it.demoUrl ? btn(it.demoLabel || "打开安装演示", it.demoUrl, true) : "") + links + downloads + "</div>" : "") + "<h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4>" + practice + "<h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
       return { tag: "details", cls: "", html: '<summary><span class="no">' + esc(no) + '</span><span class="tt">' + esc(it.title) + '</span></summary><div class="ans">' + b + "</div>" };
     },
     faq: function (it) { return { tag: "details", cls: "", html: '<summary><span class="tt">' + esc(it.q) + '</span></summary><div class="ans">' + it.a + "</div>" }; },

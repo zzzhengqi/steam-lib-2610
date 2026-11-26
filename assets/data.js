@@ -92,10 +92,10 @@ window.SITE = {
         steps: ["放对位置：在项目根目录放一个 AGENTS.md，Codex 每次开启新任务都会先读它——办公桌可以天天清，贴墙上的红线永远在。", "先生成、再瘦身：项目里还没有规则文件时，在 Codex 里输入 /init 自动生成初稿；已有文件则先让它通读再补充。", "只写 4 类硬规矩（控在 15 行内）：怎么预览运行、怎么导出成品、风格/尺寸硬标准、绝对不能碰的文件或做法。", "狠心删废话：删掉“写优雅代码”这类空话，也删掉 Codex 扫一眼代码自己就能看出来的目录介绍——规则越短越具体，它越听话。", "两步验收 + 钓鱼测试：开一个全新对话，先让它复述一条核心红线；再故意提一个违禁小要求，确认它会主动拦住你。"],
         practice: "打开你的动画项目（或第 8 课的个人作品集），用 /init 起步并精简出一份不超过 15 行的 AGENTS.md（写清预览方式、导出/交付方式、画幅或样式标准、禁止事项），然后开新对话做一次“钓鱼测试”。",
         check: ["我的项目根目录里有一份 15 行以内的 AGENTS.md", "我亲手删掉了空话和重复信息，每一行都是可执行的硬规矩", "我在新对话里做过复述抽查或钓鱼测试，确认 Codex 真的生效了"] },
-      { title: "MCP 与技能：给 Agent 装上工具箱", goal: "理解 MCP 和技能（Skill）分别解决什么问题，并尝试接入一个。",
-        steps: ["MCP 是连接外部工具的标准，例如让 Codex 查你授权的 Notion 页面。", "终端版示例：运行 codex mcp add notion --url https://mcp.notion.com/mcp；按提示授权，必要时用 codex mcp login notion。", "用 codex mcp list 查看配置；Codex 对话中用 /mcp 查看连接。先在测试空间做一次只读查询。", "技能用 SKILL.md 记录某类任务的做法；项目技能可以放在 .agents/skills/技能名/，用 $技能名 调用。", "只接入信任的工具，授权前确认能访问哪些数据。"],
-        practice: "任选其一：在测试空间用已授权的 MCP 做一次只读查询，或写一个 SKILL.md 并用 $技能名 跑一次练习。",
-        check: ["我能说清 MCP 和技能的区别", "我写过一份自己的技能说明"] }
+      { title: "MCP 与技能：给 Agent 装上工具箱", goal: "彻底分清 AGENTS.md、技能（Skill）和 MCP 的分工，亲手在 Codex 里跑通一个专属技能，并掌握安全接入外部工具的方法。",
+        steps: ["一句话分清三兄弟：AGENTS.md 是贴墙上的项目红线（每次必读）；技能（Skill）是抽屉里的专项 SOP（按需调用，平时不占上下文）；MCP 是连接外部软件的统一转接头（让 Codex 的手伸出本地文件夹）。", "先做零门槛技能（Skill）：在项目里新建 .agents/skills/技能名/SKILL.md，写清“触发场景 + 固定步骤 + 输出格式”，在 Codex 对话里直接输入 $技能名 一键调用。", "再认识 MCP 接入流程：MCP 让 Codex 能直接读取外部工具（如你授权的 Notion 页面）。终端版三步走：用 codex mcp add notion --url https://mcp.notion.com/mcp 添加，按提示完成授权（必要时运行 codex mcp login notion），再用 codex mcp list 检查配置。", "对话内确认与只读试水：在 Codex 对话中输入 /mcp 查看当前已连接的工具；第一次测试，务必先在测试空间做一次只读查询。", "守住安全底线：只接入信任的官方或大厂工具，授权前看清它能读写哪些数据，绝不把核心正式库直接交给未经验证的外部工具。"],
+        practice: ["必做：在你的项目里创建一份 .agents/skills/check-before-ship/SKILL.md（比如“网页上线前体检”或“视频导出前核查”技能），并用 $check-before-ship 在 Codex 里完整跑通一次。", "进阶选做：按上述命令接入一个你信任的外部 MCP（如 Notion），在测试空间完成一次只读查询。"],
+        check: ["我能用大白话说清 AGENTS.md、Skill 和 MCP 三者的区别", "我在项目里写过一份 SKILL.md，并用 $技能名 实际调用跑通过", "我知道接入 MCP 前要核对数据权限，并先做只读测试"] }
     ] },
 
   { id: "install", group: "学习", icon: "💻", title: "安装教程（Windows）", type: "steps",
