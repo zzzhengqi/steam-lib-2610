@@ -94,8 +94,14 @@
       var links = (it.links || []).map(function (link) {
         return btn(link.label, link.url, false);
       }).join("");
+      var steps = (it.steps || []).map(function (step) {
+        if (Array.isArray(step)) {
+          return "<li>" + esc(step[0]) + ul(step.slice(1)) + "</li>";
+        }
+        return "<li>" + esc(step) + "</li>";
+      }).join("");
       var practice = Array.isArray(it.practice) ? ul(it.practice) : "<p>" + esc(it.practice) + "</p>";
-      var b = '<div class="goal">目标：' + esc(it.goal) + "</div>" + (it.demoUrl || links || downloads ? '<div class="links">' + (it.demoUrl ? btn(it.demoLabel || "打开安装演示", it.demoUrl, true) : "") + links + downloads + "</div>" : "") + "<h4>怎么做</h4>" + ul(it.steps, "ol") + "<h4>动手练习</h4>" + practice + "<h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
+      var b = '<div class="goal">目标：' + esc(it.goal) + "</div>" + (it.demoUrl || links || downloads ? '<div class="links">' + (it.demoUrl ? btn(it.demoLabel || "打开安装演示", it.demoUrl, true) : "") + links + downloads + "</div>" : "") + "<h4>怎么做</h4>" + (steps ? "<ol>" + steps + "</ol>" : "") + "<h4>动手练习</h4>" + practice + "<h4>自检清单</h4>" + ul((it.check || []).map(function (c) { return "✓ " + c; }));
       return { tag: "details", cls: "", html: '<summary><span class="no">' + esc(no) + '</span><span class="tt">' + esc(it.title) + '</span></summary><div class="ans">' + b + "</div>" };
     },
     faq: function (it) { return { tag: "details", cls: "", html: '<summary><span class="tt">' + esc(it.q) + '</span></summary><div class="ans">' + it.a + "</div>" }; },
@@ -134,7 +140,7 @@
       var sub = it.desc || it.d || it.goal || it.def || plain(it.a) || (it.list || []).join("，");
       var tb = it.table ? (it.table.head || []).concat.apply([], it.table.rows).join(" ") : "";
       var lv = (it.levels || []).map(function (l) { return l.t + " " + l.d; }).join(" ");
-      var all = [title, sub, tb, lv, it.note, it.text, it.code, plain(it.a), (it.steps || []).join(" "), it.practice, (it.list || []).join(" "), (it.tags || []).join(" "), it.tag, it.meta].join(" ").toLowerCase();
+      var all = [title, sub, tb, lv, it.note, it.text, it.code, plain(it.a), (it.steps || []).flat().join(" "), it.practice, (it.list || []).join(" "), (it.tags || []).join(" "), it.tag, it.meta].join(" ").toLowerCase();
       INDEX.push({ sec: sec, i: i, title: title, sub: sub, all: all });
     });
   });
